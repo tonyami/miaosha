@@ -1,0 +1,11 @@
+{
+  "server": {
+    "port": 8080
+  },
+  "mysql": {
+    "dsn": "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8",
+    "idles": 2,
+    "opens": 5,
+    "lifetime": 5000
+  }
+}
