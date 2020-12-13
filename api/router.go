@@ -1,5 +1,5 @@
 package api
 
 func initRouter() {
-	e.GET("/user/info", getUserInfo)
+	e.POST("/user/register", userRegister)
 }

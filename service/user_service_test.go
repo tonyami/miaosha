@@ -14,10 +14,8 @@ func init() {
 	userService = NewUserService()
 }
 
-func TestUserService_GetInfo(t *testing.T) {
-	user, err := userService.GetInfo(5)
-	if err != nil {
+func TestUserService_Register(t *testing.T) {
+	if err := userService.Register("18800001111", "123456"); err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%#v", user)
 }

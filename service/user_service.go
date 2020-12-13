@@ -8,7 +8,7 @@ import (
 )
 
 type IUserService interface {
-	GetInfo(id int64) (*model.User, error)
+	Register(user *model.User) error
 }
 
 type UserService struct {
@@ -21,14 +21,29 @@ func NewUserService() *UserService {
 	}
 }
 
-func (s *UserService) GetInfo(id int64) (user *model.User, err error) {
-	if user, err = s.userDao.QueryById(id); err != nil {
-		log.Println(err)
+func (s *UserService) Register(user *model.User) (err error) {
+	var (
+		u  *model.User
+		id int64
+	)
+	// 根据手机号码查询用户是否已经注册
+	if u, err = s.userDao.QueryByMobile(user.Mobile); err != nil {
+		log.Printf("【注册】: %s, mobile: %s\n", err, user.Mobile)
 		err = code.SystemErr
 		return
 	}
-	if user.Id == 0 {
-		err = code.UserNotFound
+	if u.Id > 0 {
+		err = code.UserMobileRegistered
+		return
+	}
+	u.New(user)
+	if id, err = s.userDao.Save(u); err != nil {
+		log.Printf("【注册】: %s; User: %#v\n", err, user)
+		err = code.SystemErr
+		return
+	}
+	if id == 0 {
+		err = code.UserRegisterErr
 	}
 	return
 }

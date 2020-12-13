@@ -5,7 +5,7 @@
   },
   "mysql": {
     "dns:数据库连接信息": "",
-    "dsn": "root:123456@tcp(127.0.0.1:3306)/miaosha?charset=utf8",
+    "dsn": "root:123456@tcp(127.0.0.1:3306)/miaosha?charset=utf8&parseTime=true&loc=Local",
     "idles:最大空闲连接": "默认:2",
     "idles": 2,
     "opens:最大打开连接": "默认:5",

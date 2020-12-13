@@ -2,21 +2,24 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"miaosha/lib/code"
 	"miaosha/lib/resp"
-	"strconv"
+	"miaosha/model"
 )
 
-func getUserInfo(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Query("id"), 10, 64)
-	if err != nil {
-		resp.NewError(c, code.ConvertErr)
-		return
+func userRegister(c *gin.Context) {
+	mobile := c.PostForm("mobile")
+	password := c.PostForm("password")
+	user := &model.User{
+		Mobile:   mobile,
+		Password: password,
 	}
-	user, err := userService.GetInfo(id)
-	if err != nil {
+	if err := user.Check(); err != nil {
 		resp.NewError(c, err)
 		return
 	}
-	resp.NewSuccessWith(c, user)
+	if err := userService.Register(user); err != nil {
+		resp.NewError(c, err)
+		return
+	}
+	resp.NewSuccess(c)
 }
