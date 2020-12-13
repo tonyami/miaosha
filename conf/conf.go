@@ -3,35 +3,37 @@ package conf
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"time"
 )
 
-var Conf *Config
+var (
+	conf   *Config
+	Server *ServerConf
+	Mysql  *MysqlConf
+)
 
 type Config struct {
-	Server Server `json:"server"`
-	Mysql  *Mysql `json:"mysql"`
+	Server *ServerConf `json:"server"`
+	Mysql  *MysqlConf  `json:"mysql"`
 }
 
-type Server struct {
+type ServerConf struct {
 	Port int `json:"port"`
 }
 
-type Mysql struct {
+type MysqlConf struct {
 	DSN      string        `json:"dsn"`
 	Idles    int           `json:"idles"`
 	Opens    int           `json:"opens"`
 	Lifetime time.Duration `json:"lifetime"`
 }
 
-func Init(path string) error {
-	if path == "" {
-		return load("conf.json")
+func Init(env string) error {
+	if env == "test" {
+		return load(os.Getenv("MIAOSHA_ROOT") + "/conf.json")
 	}
-	if path == "test" {
-		return load("D:\\dev\\code\\miaosha\\cmd\\conf.json")
-	}
-	return load(path)
+	return load("conf.json")
 }
 
 func load(path string) (err error) {
@@ -39,8 +41,10 @@ func load(path string) (err error) {
 	if err != nil {
 		return
 	}
-	if err = json.Unmarshal(data, &Conf); err != nil {
+	if err = json.Unmarshal(data, &conf); err != nil {
 		return
 	}
+	Server = conf.Server
+	Mysql = conf.Mysql
 	return
 }

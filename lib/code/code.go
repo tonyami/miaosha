@@ -34,7 +34,7 @@ func (e Code) Message() string {
 	return codes[e.Code()]
 }
 
-func String(e string) Code {
+func ToCode(e string) Code {
 	i, err := strconv.Atoi(e)
 	if err != nil {
 		return SystemErr

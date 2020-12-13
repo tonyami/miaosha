@@ -1,16 +1,16 @@
 package main
 
 import (
+	"miaosha/api"
 	"miaosha/conf"
-	"miaosha/http"
 )
 
 func main() {
 	if err := conf.Init(""); err != nil {
 		panic(err)
 	}
-	http.Init(conf.Conf)
-	if err := http.Run(conf.Conf); err != nil {
+	api.Init()
+	if err := api.Run(); err != nil {
 		panic(err)
 	}
 }
