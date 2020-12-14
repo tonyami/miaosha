@@ -2,23 +2,17 @@ package dao
 
 import (
 	"database/sql"
-	"miaosha/conf"
-	"miaosha/lib/database/mysql"
+	"miaosha/conf/mysql"
 	"miaosha/model"
 )
 
-type IUserDao interface {
-	QueryByMobile(string) (*model.User, error)
-	Save(*model.User) (int64, error)
-}
-
-type UserDao struct {
+type Dao struct {
 	db *sql.DB
 }
 
-func NewUserDao() *UserDao {
-	return &UserDao{
-		db: mysql.New(conf.Mysql),
+func New() *Dao {
+	return &Dao{
+		db: mysql.New(),
 	}
 }
 
@@ -27,7 +21,7 @@ var (
 	_saveSql          = "insert into user(mobile, password, salt, register_time) values(?, ?, ?, ?)"
 )
 
-func (d *UserDao) QueryByMobile(mobile string) (user *model.User, err error) {
+func (d *Dao) QueryByMobile(mobile string) (user *model.User, err error) {
 	user = &model.User{}
 	if err = d.db.QueryRow(_queryByMobileSql, mobile).Scan(&user.Id, &user.Mobile, &user.Password, &user.Salt, &user.RegisterTime); err != nil {
 		if err == sql.ErrNoRows {
@@ -37,7 +31,7 @@ func (d *UserDao) QueryByMobile(mobile string) (user *model.User, err error) {
 	return
 }
 
-func (d *UserDao) Save(user *model.User) (id int64, err error) {
+func (d *Dao) Save(user *model.User) (id int64, err error) {
 	stmt, err := d.db.Prepare(_saveSql)
 	if err != nil {
 		return

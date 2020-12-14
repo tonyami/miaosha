@@ -1,4 +1,4 @@
-package random
+package util
 
 import (
 	"bytes"
