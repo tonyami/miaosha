@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"miaosha/conf"
 	"miaosha/model"
 	"net/http"
 )
@@ -50,5 +51,12 @@ func userLogin(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, &Resp{
 		Data: token,
+	})
+}
+
+func userInfo(c *gin.Context) {
+	user, _ := c.Get(conf.UserSession)
+	c.JSON(http.StatusOK, &Resp{
+		Data: user,
 	})
 }

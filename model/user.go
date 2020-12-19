@@ -7,11 +7,25 @@ import (
 )
 
 type User struct {
-	Id           int64     `json:"id"`
-	Mobile       string    `json:"mobile"`
-	Password     string    `json:"-"`
-	Salt         string    `json:"-"`
-	RegisterTime time.Time `json:"register_time"`
+	Id           int64
+	Mobile       string
+	Password     string
+	Salt         string
+	RegisterTime time.Time
+}
+
+type UserDTO struct {
+	Id           int64  `json:"id"`
+	Mobile       string `json:"mobile"`
+	RegisterTime string `json:"registerTime"`
+}
+
+func (user *User) ToDTO() (dto *UserDTO) {
+	dto = &UserDTO{}
+	dto.Id = user.Id
+	dto.Mobile = user.Mobile
+	dto.RegisterTime = user.RegisterTime.Format("2006-01-02 15:04:05")
+	return
 }
 
 func (user *User) Check() (err error) {

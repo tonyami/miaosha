@@ -3,6 +3,7 @@ package errmsg
 var (
 	InvalidParameter Errmsg = "请求参数错误"
 	SystemErr        Errmsg = "系统错误"
+	SerializeErr     Errmsg = "序列化失败"
 
 	MobileRegistered    Errmsg = "注册失败，该手机号码已注册"
 	RegisterErr         Errmsg = "注册失败"

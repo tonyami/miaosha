@@ -1,13 +1,19 @@
-package dao
+package user
 
 import (
 	"log"
+	"miaosha/conf"
 	"miaosha/model"
 	"testing"
 	"time"
 )
 
-var d = New()
+var d *Dao
+
+func init() {
+	conf.Init()
+	d = New()
+}
 
 func TestDao_QueryById(t *testing.T) {
 	user, err := d.QueryByMobile("18812345678")

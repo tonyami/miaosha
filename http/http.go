@@ -3,6 +3,7 @@ package http
 import (
 	"flag"
 	"github.com/gin-gonic/gin"
+	"miaosha/http/middleware"
 	"miaosha/service/user"
 )
 
@@ -19,6 +20,8 @@ func initService() {
 func initRouter() {
 	router.POST("/user/register", userRegister)
 	router.POST("/user/login", userLogin)
+	router.Use(middleware.Auth(userSrv))
+	router.GET("/user/info", userInfo)
 }
 
 func Init() error {
@@ -29,7 +32,8 @@ func Init() error {
 }
 
 func init() {
-	flag.StringVar(&p, "p", "", "port")
+	flag.StringVar(&p, "p", "", "server port, default: 8080")
+	flag.Parse()
 	if p == "" {
 		p = "8080"
 	}

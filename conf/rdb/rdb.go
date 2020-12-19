@@ -1,11 +1,12 @@
-package redis
+package rdb
 
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
+	"log"
 	"miaosha/conf"
-	"os"
 	"sync"
+	"time"
 )
 
 var (
@@ -22,14 +23,15 @@ func New() *redis.Client {
 }
 
 func connect() *redis.Client {
-	addr := os.Getenv(conf.ENV_MIAOSHA_REDIS)
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: "",
-		DB:       0,
+		Addr:        conf.Conf.RedisAddr,
+		Password:    conf.Conf.RedisPassword,
+		DB:          0,
+		DialTimeout: 1 * time.Second,
+		MaxRetries:  2,
 	})
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		panic(err)
+		log.Print(err)
 	}
 	return rdb
 }

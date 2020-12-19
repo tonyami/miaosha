@@ -1,11 +1,14 @@
 package mysql
 
 import (
+	"miaosha/conf"
 	"testing"
 )
 
+func init() {
+	conf.Init()
+}
+
 func TestNew(t *testing.T) {
-	db1 := New()
-	db2 := New()
-	t.Log(db1 == db2)
+	t.Log(New())
 }

@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"database/sql"
+	"fmt"
 	"miaosha/conf"
-	"os"
 	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -22,7 +22,7 @@ func New() *sql.DB {
 }
 
 func connect() (db *sql.DB) {
-	dsn := os.Getenv(conf.ENV_MIAOSHA_DSN)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/miaosha?charset=utf8&parseTime=true&loc=Local", conf.Conf.DbUser, conf.Conf.DbPassword, conf.Conf.DbAddr)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err)

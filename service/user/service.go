@@ -1,20 +1,28 @@
 package user
 
 import (
+	"context"
+	"encoding/json"
+	"github.com/go-redis/redis/v8"
 	"log"
+	"miaosha/conf"
 	"miaosha/conf/errmsg"
-	dao "miaosha/dao/user"
+	"miaosha/conf/rdb"
+	"miaosha/dao/user"
 	"miaosha/model"
 	"miaosha/util"
+	"time"
 )
 
 type Service struct {
-	dao *dao.Dao
+	dao *user.Dao
+	rdb *redis.Client
 }
 
 func New() *Service {
 	return &Service{
-		dao: dao.New(),
+		dao: user.New(),
+		rdb: rdb.New(),
 	}
 }
 
@@ -56,7 +64,7 @@ func (s *Service) Login(user *model.User) (token string, err error) {
 		return
 	}
 	if u.Id == 0 {
-		err = errmsg.MobileRegistered
+		err = errmsg.MobileNotRegistered
 		return
 	}
 	// 密码比对
@@ -64,10 +72,31 @@ func (s *Service) Login(user *model.User) (token string, err error) {
 		return
 	}
 	// 登录成功，生成token并写入redis
-	token = createToken()
+	token = util.Create(64)
+	dto := u.ToDTO()
+	data, err := json.Marshal(dto)
+	if err != nil {
+		err = errmsg.SerializeErr
+		return
+	}
+	s.rdb.Set(context.Background(), conf.TokenPrefix+token, string(data), conf.TokenExpire*time.Second)
 	return
 }
 
-func createToken() string {
-	return util.Create(64)
+func (s *Service) Info(token string) (dto *model.UserDTO, err error) {
+	res := s.rdb.Get(context.Background(), conf.TokenPrefix+token)
+	dto = &model.UserDTO{}
+	if res.Err() != nil {
+		if res.Err() == redis.Nil {
+			err = nil
+			return
+		}
+		log.Printf("【Session验证失败】: %s", res.Err())
+		err = errmsg.SystemErr
+		return
+	}
+	if err = json.Unmarshal([]byte(res.Val()), dto); err != nil {
+		err = errmsg.SerializeErr
+	}
+	return
 }
