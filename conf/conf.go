@@ -5,9 +5,13 @@ import (
 )
 
 const (
-	TokenPrefix = "token:"
-	TokenExpire = 1200
-	UserSession = "user"
+	TokenPrefix             = "token:"
+	TokenExpire             = 2 * 3600
+	UserSession             = "user"
+	GoodsSize               = 10
+	MiaoshaStatusNotStarted = 0
+	MiaoshaStatusOnGoing    = 1
+	MiaoshaStatusFinished   = 2
 )
 
 var Conf *Config

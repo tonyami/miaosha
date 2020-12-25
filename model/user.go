@@ -44,13 +44,9 @@ func (user *User) EqualsPwd(u *User) (err error) {
 }
 
 func (user *User) New(u *User) {
-	user.Salt = createSalt()
+	user.Salt = util.CreateSalt()
 	user.Mobile = u.Mobile
 	user.Password = util.Md5(u.Password + user.Salt)
 	user.RegisterTime = time.Now()
 	return
-}
-
-func createSalt() string {
-	return util.Create(16)
 }

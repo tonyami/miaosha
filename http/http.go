@@ -4,17 +4,20 @@ import (
 	"flag"
 	"github.com/gin-gonic/gin"
 	"miaosha/http/middleware"
+	"miaosha/service/goods"
 	"miaosha/service/user"
 )
 
 var (
-	p       string
-	router  *gin.Engine
-	userSrv *user.Service
+	p        string
+	router   *gin.Engine
+	userSrv  *user.Service
+	goodsSrv *goods.Service
 )
 
 func initService() {
 	userSrv = user.New()
+	goodsSrv = goods.New()
 }
 
 func initRouter() {
@@ -22,6 +25,8 @@ func initRouter() {
 	router.POST("/user/login", userLogin)
 	router.Use(middleware.Auth(userSrv))
 	router.GET("/user/info", userInfo)
+	router.GET("/goods", getGoodsList)
+	router.GET("/goods/:goodsId", getGoodsDetail)
 }
 
 func Init() error {

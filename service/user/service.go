@@ -33,17 +33,17 @@ func (s *Service) Register(user *model.User) (err error) {
 	)
 	// 根据手机号码查询用户是否已经注册
 	if u, err = s.dao.QueryByMobile(user.Mobile); err != nil {
-		log.Printf("【注册失败】: %s, %#v\n", err, user)
+		log.Printf("【用户】注册失败: %s, %#v\n", err, user)
 		err = errmsg.SystemErr
 		return
 	}
-	if u.Id == 0 {
-		err = errmsg.MobileNotRegistered
+	if u.Id > 0 {
+		err = errmsg.MobileRegistered
 		return
 	}
 	u.New(user)
 	if id, err = s.dao.Save(u); err != nil {
-		log.Printf("【注册失败】: %s; %#v\n", err, user)
+		log.Printf("【用户】注册失败: %s; %#v\n", err, user)
 		err = errmsg.SystemErr
 		return
 	}
@@ -59,7 +59,7 @@ func (s *Service) Login(user *model.User) (token string, err error) {
 	)
 	// 根据手机号码查询用户是否已经注册
 	if u, err = s.dao.QueryByMobile(user.Mobile); err != nil {
-		log.Printf("【登录失败】: %s, %#v\n", err, user)
+		log.Printf("【用户】登录失败: %s, %#v\n", err, user)
 		err = errmsg.SystemErr
 		return
 	}
@@ -72,7 +72,7 @@ func (s *Service) Login(user *model.User) (token string, err error) {
 		return
 	}
 	// 登录成功，生成token并写入redis
-	token = util.Create(64)
+	token = util.CreateToken()
 	dto := u.ToDTO()
 	data, err := json.Marshal(dto)
 	if err != nil {
@@ -91,7 +91,7 @@ func (s *Service) Info(token string) (dto *model.UserDTO, err error) {
 			err = nil
 			return
 		}
-		log.Printf("【Session验证失败】: %s", res.Err())
+		log.Printf("【用户】Session验证失败: %s", res.Err())
 		err = errmsg.SystemErr
 		return
 	}

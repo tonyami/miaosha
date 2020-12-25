@@ -6,7 +6,15 @@ import (
 	"math/big"
 )
 
-func Create(len int) string {
+func CreateToken() string {
+	return create(64)
+}
+
+func CreateSalt() string {
+	return create(16)
+}
+
+func create(len int) string {
 	var container string
 	var str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 	b := bytes.NewBufferString(str)
