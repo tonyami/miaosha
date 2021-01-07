@@ -13,6 +13,7 @@ const (
 )
 
 const (
+	DefaultAvatar    = "default.jpg"
 	UserSession      = "X-User-Session" // user session
 	PageSize         = 10               // 商品列表分页大小
 	StatusNotStarted = 0                // 秒杀状态：未开始

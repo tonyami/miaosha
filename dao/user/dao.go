@@ -18,15 +18,15 @@ func New() *Dao {
 }
 
 var (
-	_getSql    = `select id, mobile, register_time from user where mobile = ? limit 1`
-	_insertSql = `insert into user(mobile, register_time) values(?, ?)`
+	_getSql    = `select id, mobile, avatar, create_time from miaosha_user where mobile = ? limit 1`
+	_insertSql = `insert into miaosha_user(mobile, avatar, create_time) values(?, ?, ?)`
 )
 
 func (d *Dao) Get(mobile string) (user *model.User, err error) {
 	user = &model.User{}
-	if err = d.db.QueryRow(_getSql, mobile).Scan(&user.Id, &user.Mobile, &user.RegisterTime); err != nil {
+	if err = d.db.QueryRow(_getSql, mobile).Scan(&user.Id, &user.Mobile, &user.Avatar, &user.CreateTime); err != nil {
+		user = nil
 		if err == sql.ErrNoRows {
-			user = nil
 			err = nil
 		}
 	}
@@ -42,7 +42,7 @@ func (d *Dao) Insert(user *model.User) (insertId int64, err error) {
 		return
 	}
 	defer stmt.Close()
-	if rs, err = stmt.Exec(user.Mobile, user.RegisterTime); err != nil {
+	if rs, err = stmt.Exec(user.Mobile, user.Avatar, user.CreateTime); err != nil {
 		return
 	}
 	if insertId, err = rs.LastInsertId(); err != nil {

@@ -18,17 +18,13 @@ func New() *Dao {
 }
 
 var (
-	_getListSql = `select m.id miaosha_id, m.goods_id, m.miaosha_price, m.miaosha_stock, m.start_time, m.end_time,
-						g.id, g.goods_name, g.goods_img, g.goods_price
-					from miaosha_goods m left join goods g on m.goods_id = g.id
-					order by m.id desc limit ?, ?`
-	_getSql = `select m.id miaosha_id, m.goods_id, m.miaosha_price, m.miaosha_stock, m.start_time, m.end_time,
-					g.id, g.goods_name, g.goods_img, g.goods_price
-				from miaosha_goods m left join goods g on m.goods_id = g.id
-				where m.id = ? limit 1`
+	_getListSql = `select id, name, img, origin_price, price, stock, start_time, end_time
+					from miaosha_goods order by id desc limit ?, ?`
+	_getSql = `select id, name, img, origin_price, price, stock, start_time, end_time
+				from miaosha_goods where id = ? limit 1`
 )
 
-func (d *Dao) GetList(page, size int) (list []*model.GoodsDTO, err error) {
+func (d *Dao) GetList(page, size int) (list []*model.Goods, err error) {
 	stmt, err := d.db.Prepare(_getListSql)
 	if err != nil {
 		return nil, err
@@ -39,40 +35,29 @@ func (d *Dao) GetList(page, size int) (list []*model.GoodsDTO, err error) {
 		return nil, err
 	}
 	defer rows.Close()
-	list = []*model.GoodsDTO{}
+	list = []*model.Goods{}
 	for rows.Next() {
-		miaoshaGoods := &model.MiaoshaGoods{}
 		goods := &model.Goods{}
-		if err = rows.Scan(&miaoshaGoods.Id, &miaoshaGoods.GoodsId, &miaoshaGoods.MiaoshaPrice, &miaoshaGoods.MiaoshaStock, &miaoshaGoods.StartTime, &miaoshaGoods.EndTime,
-			&goods.Id, &goods.GoodsName, &goods.GoodsImg, &goods.GoodsPrice); err != nil {
+		if err = rows.Scan(&goods.Id, &goods.Name, &goods.Img, &goods.OriginPrice, &goods.Price, &goods.Stock, &goods.StartTime, &goods.EndTime); err != nil {
 			return
 		}
-		dto := &model.GoodsDTO{
-			MiaoshaGoods: miaoshaGoods,
-			Goods:        goods,
-		}
-		list = append(list, dto)
+		list = append(list, goods)
 	}
 	return
 }
 
-func (d *Dao) Get(goodsId int64) (goodsDTO *model.GoodsDTO, err error) {
+func (d *Dao) Get(goodsId int64) (goods *model.Goods, err error) {
 	stmt, err := d.db.Prepare(_getSql)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
-	miaoshaGoods := &model.MiaoshaGoods{}
-	goods := &model.Goods{}
-	if err = stmt.QueryRow(goodsId).Scan(&miaoshaGoods.Id, &miaoshaGoods.GoodsId, &miaoshaGoods.MiaoshaPrice, &miaoshaGoods.MiaoshaStock, &miaoshaGoods.StartTime, &miaoshaGoods.EndTime,
-		&goods.Id, &goods.GoodsName, &goods.GoodsImg, &goods.GoodsPrice); err != nil {
+	goods = &model.Goods{}
+	if err = stmt.QueryRow(goodsId).Scan(&goods.Id, &goods.Name, &goods.Img, &goods.OriginPrice, &goods.Price, &goods.Stock, &goods.StartTime, &goods.EndTime); err != nil {
+		goods = nil
 		if err == sql.ErrNoRows {
 			err = nil
 		}
-	}
-	goodsDTO = &model.GoodsDTO{
-		MiaoshaGoods: miaoshaGoods,
-		Goods:        goods,
 	}
 	return
 }

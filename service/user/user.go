@@ -61,9 +61,11 @@ func (s *Service) Login(mobile, smsCode string) (token string, err error) {
 	}
 	// 4、如果用户不存在，则注册
 	if u == nil {
-		u = &model.User{}
-		u.Mobile = mobile
-		u.RegisterTime = time.Now()
+		u = &model.User{
+			Mobile:     mobile,
+			Avatar:     conf.DefaultAvatar,
+			CreateTime: time.Now(),
+		}
 		if u.Id, err = s.dao.Insert(u); err != nil {
 			log.Printf("Login Failed: %s", err)
 			err = code.SystemErr
@@ -87,7 +89,7 @@ func (s *Service) Login(mobile, smsCode string) (token string, err error) {
 	return
 }
 
-func (s *Service) GetUser(token string) (user *model.User, err error) {
+func (s *Service) Auth(token string) (user *model.User, err error) {
 	sc := s.redisCli.Get(context.Background(), fmt.Sprintf(conf.TokenKey, token))
 	if sc.Err() != nil && sc.Err() != redis.Nil {
 		log.Printf("GetUser Failed: %s", sc)
@@ -98,6 +100,14 @@ func (s *Service) GetUser(token string) (user *model.User, err error) {
 		err = code.Unauthorized
 		return
 	}
-	err = json.Unmarshal([]byte(sc.Val()), &user)
+	if err = json.Unmarshal([]byte(sc.Val()), &user); err != nil {
+		err = code.SystemErr
+	}
+	// 重置 token 有效期
+	if sc2 := s.redisCli.Expire(context.Background(), fmt.Sprintf(conf.TokenKey, token), conf.TokenIn); sc2.Err() != nil && sc2.Err() != redis.Nil {
+		log.Printf("Auth Failed: %s", sc2)
+		err = code.SystemErr
+		return
+	}
 	return
 }

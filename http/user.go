@@ -29,11 +29,23 @@ func Login(c *gin.Context) {
 	if err := c.Bind(r); err != nil {
 		return
 	}
+	if len(r.Mobile) != 11 {
+		JSON2(c, nil, code.MobileErr)
+		return
+	}
+	if len(r.SmsCode) != 6 {
+		JSON2(c, nil, code.CodeErr)
+		return
+	}
 	token, err := userService.Login(r.Mobile, r.SmsCode)
 	JSON2(c, token, err)
 }
 
-func UserInfo(c *gin.Context) {
-	user, _ := c.Get(conf.UserSession)
+func GetUser(c *gin.Context) {
+	user, ok := c.Get(conf.UserSession)
+	if !ok {
+		JSON2(c, nil, code.Unauthorized)
+		return
+	}
 	JSON2(c, user, nil)
 }

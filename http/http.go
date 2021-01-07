@@ -22,7 +22,7 @@ func initRouter(router *gin.Engine) {
 	router.GET("/code/sms", SendSmsCode)
 	router.POST("/user/login", Login)
 	router.Use(Auth())
-	router.GET("/user/info", UserInfo)
+	router.GET("/user", GetUser)
 	router.GET("/goods", GetGoodsList)
 	router.GET("/goods/:id", GetGoods)
 }

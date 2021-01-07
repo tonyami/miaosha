@@ -13,15 +13,14 @@ func init() {
 }
 
 func TestDao_GetList(t *testing.T) {
-	list, err := d.GetList(1, 10)
-	if err != nil || len(list) == 0 {
-		t.Fatal()
+	if _, err := d.GetList(1, 10); err != nil {
+		t.Fatal(err)
 	}
 }
 
 func TestDao_Get(t *testing.T) {
 	goods, err := d.Get(1)
-	if err != nil || goods.Goods.Id == 0 {
-		t.Fatal()
+	if err != nil || goods == nil {
+		t.Fatal(err)
 	}
 }

@@ -14,7 +14,7 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		user, err := userService.GetUser(token)
+		user, err := userService.Auth(token)
 		if err != nil {
 			JSON2(c, nil, err)
 			c.Abort()

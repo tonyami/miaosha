@@ -22,8 +22,9 @@ func TestDao_Get(t *testing.T) {
 
 func TestDao_Insert(t *testing.T) {
 	user := &model.User{
-		Mobile:       "18800000001",
-		RegisterTime: time.Now(),
+		Mobile:     "18800000004",
+		Avatar:     conf.DefaultAvatar,
+		CreateTime: time.Now(),
 	}
 	if insertId, err := d.Insert(user); err != nil || insertId == 0 {
 		t.Fatal(err)
