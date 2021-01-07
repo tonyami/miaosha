@@ -1,12 +1,11 @@
-package mysql
+package db
 
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"miaosha/conf"
 	"sync"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -14,15 +13,15 @@ var (
 	once sync.Once
 )
 
-func New() *sql.DB {
+func New(c *conf.DB) *sql.DB {
 	once.Do(func() {
-		db = connect()
+		db = open(c)
 	})
 	return db
 }
 
-func connect() (db *sql.DB) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/miaosha?charset=utf8&parseTime=true&loc=Local", conf.Conf.DbUser, conf.Conf.DbPassword, conf.Conf.DbAddr)
+func open(c *conf.DB) *sql.DB {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local", c.User, c.Password, c.Host, c.Name)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err)
@@ -33,5 +32,5 @@ func connect() (db *sql.DB) {
 	db.SetMaxIdleConns(2)
 	db.SetMaxOpenConns(5)
 	db.SetConnMaxLifetime(3000)
-	return
+	return db
 }

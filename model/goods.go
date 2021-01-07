@@ -5,6 +5,51 @@ import (
 	"time"
 )
 
+// vo
+type GoodsVO struct {
+	Id          int64  `json:"id"`
+	GoodsId     int64  `json:"goodsId"`
+	Price       int64  `json:"price"`
+	Duration    int64  `json:"duration"`
+	GoodsName   string `json:"goodsName"`
+	GoodsImg    string `json:"goodsImg"`
+	OriginPrice int64  `json:"originPrice"`
+	Status      int8   `json:"status"`
+}
+
+func (dto *GoodsDTO) ToVO() (vo *GoodsVO) {
+	vo = &GoodsVO{}
+	vo.Id = dto.MiaoshaGoods.Id
+	vo.GoodsId = dto.MiaoshaGoods.GoodsId
+	vo.Price = dto.MiaoshaGoods.MiaoshaPrice
+	vo.GoodsName = dto.Goods.GoodsName
+	vo.GoodsImg = dto.Goods.GoodsImg
+	vo.OriginPrice = dto.Goods.GoodsPrice
+	startTime := dto.MiaoshaGoods.StartTime.Unix()
+	endTime := dto.MiaoshaGoods.EndTime.Unix()
+	now := time.Now().Unix()
+	if now < startTime {
+		vo.Status = conf.StatusNotStarted
+		vo.Duration = startTime - now
+	} else if now >= startTime && now <= endTime {
+		if dto.MiaoshaGoods.MiaoshaStock > 0 {
+			vo.Status = conf.StatusOnGoing
+		} else {
+			vo.Status = conf.StatusSoldOut
+		}
+	} else {
+		vo.Status = conf.StatusFinished
+	}
+	return
+}
+
+// dto
+type GoodsDTO struct {
+	Goods        *Goods
+	MiaoshaGoods *MiaoshaGoods
+}
+
+// data model
 type Goods struct {
 	Id         int64
 	GoodsName  string
@@ -19,45 +64,4 @@ type MiaoshaGoods struct {
 	MiaoshaStock int
 	StartTime    time.Time
 	EndTime      time.Time
-}
-
-type MiaoshaGoodsDTO struct {
-	Goods        *Goods
-	MiaoshaGoods *MiaoshaGoods
-}
-
-type GoodsVO struct {
-	Id         int64  `json:"id"`
-	GoodsId    int64  `json:"goodsId"`
-	Price      int64  `json:"price"`
-	Stock      int    `json:"stock"`
-	NowTime    int64  `json:"nowTime"`
-	StartTime  int64  `json:"startTime"`
-	EndTime    int64  `json:"endTime"`
-	GoodsName  string `json:"goodsName"`
-	GoodsImg   string `json:"goodsImg"`
-	GoodsPrice int64  `json:"goodsPrice"`
-	Status     int8   `json:"status"`
-}
-
-func (dto *MiaoshaGoodsDTO) ToGoodsVO() (goodsVo *GoodsVO) {
-	goodsVo = &GoodsVO{}
-	goodsVo.Id = dto.MiaoshaGoods.Id
-	goodsVo.GoodsId = dto.MiaoshaGoods.GoodsId
-	goodsVo.Price = dto.MiaoshaGoods.MiaoshaPrice
-	goodsVo.Stock = dto.MiaoshaGoods.MiaoshaStock
-	goodsVo.NowTime = time.Now().Unix()
-	goodsVo.StartTime = dto.MiaoshaGoods.StartTime.Unix()
-	goodsVo.EndTime = dto.MiaoshaGoods.EndTime.Unix()
-	goodsVo.GoodsName = dto.Goods.GoodsName
-	goodsVo.GoodsImg = dto.Goods.GoodsImg
-	goodsVo.GoodsPrice = dto.Goods.GoodsPrice
-	if goodsVo.NowTime < goodsVo.StartTime {
-		goodsVo.Status = conf.MiaoshaStatusNotStarted
-	} else if goodsVo.NowTime >= goodsVo.StartTime && goodsVo.NowTime <= goodsVo.EndTime {
-		goodsVo.Status = conf.MiaoshaStatusOnGoing
-	} else {
-		goodsVo.Status = conf.MiaoshaStatusFinished
-	}
-	return
 }

@@ -2,47 +2,33 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"miaosha/conf/errmsg"
-	"net/http"
+	"miaosha/internal/code"
 	"strconv"
 )
 
-func getGoodsList(c *gin.Context) {
+func GetGoodsList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Resp{
-			Msg: errmsg.InvalidParameter,
-		})
-		return
+		page = 1
 	}
-	goodsList, err := goodsSrv.GetGoodsList(page)
+	goodsList, err := goodsService.GetGoodsList(page)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Resp{
-			Msg: err,
-		})
+		JSON2(c, nil, err)
 		return
 	}
-	c.JSON(http.StatusOK, Resp{
-		Data: goodsList,
-	})
+	JSON2(c, goodsList, nil)
 }
 
-func getGoodsDetail(c *gin.Context) {
-	goodsId, err := strconv.ParseInt(c.Param("goodsId"), 10, 64)
+func GetGoods(c *gin.Context) {
+	goodsId, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Resp{
-			Msg: errmsg.InvalidParameter,
-		})
+		JSON2(c, nil, code.GoodsNotFound)
 		return
 	}
-	goods, err := goodsSrv.GetGoodsDetail(goodsId)
+	goods, err := goodsService.GetGoods(goodsId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Resp{
-			Msg: err,
-		})
+		JSON2(c, nil, err)
 		return
 	}
-	c.JSON(http.StatusOK, Resp{
-		Data: goods,
-	})
+	JSON2(c, goods, nil)
 }

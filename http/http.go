@@ -1,50 +1,52 @@
 package http
 
 import (
-	"flag"
 	"github.com/gin-gonic/gin"
-	"miaosha/http/middleware"
+	"miaosha/internal/code"
 	"miaosha/service/goods"
 	"miaosha/service/user"
+	"net/http"
 )
 
 var (
-	p        string
-	router   *gin.Engine
-	userSrv  *user.Service
-	goodsSrv *goods.Service
+	userService  *user.Service
+	goodsService *goods.Service
 )
 
 func initService() {
-	userSrv = user.New()
-	goodsSrv = goods.New()
+	userService = user.New()
+	goodsService = goods.New()
 }
 
-func initRouter() {
-	router.POST("/user/register", userRegister)
-	router.POST("/user/login", userLogin)
-	router.Use(middleware.Auth(userSrv))
-	router.GET("/user/info", userInfo)
-	router.GET("/goods", getGoodsList)
-	router.GET("/goods/:goodsId", getGoodsDetail)
+func initRouter(router *gin.Engine) {
+	router.GET("/code/sms", SendSmsCode)
+	router.POST("/user/login", Login)
+	router.Use(Auth())
+	router.GET("/user/info", UserInfo)
+	router.GET("/goods", GetGoodsList)
+	router.GET("/goods/:id", GetGoods)
 }
 
-func Init() error {
+func Init() {
 	initService()
-	router = gin.Default()
-	initRouter()
-	return router.Run(":" + p)
+	router := gin.Default()
+	initRouter(router)
+	router.Run()
 }
 
-func init() {
-	flag.StringVar(&p, "p", "", "server port, default: 8080")
-	flag.Parse()
-	if p == "" {
-		p = "8080"
+func JSON2(c *gin.Context, data interface{}, err error) {
+	if err != nil {
+		ec := code.String(err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": ec.Code(),
+			"msg":  ec.Message(),
+		})
+		return
 	}
-}
+	c.JSON(http.StatusOK, gin.H{
+		"code": code.Success.Code(),
+		"msg":  code.Success.Message(),
+		"data": data,
+	})
 
-type Resp struct {
-	Msg  interface{} `json:"msg,omitempty"`
-	Data interface{} `json:"data,omitempty"`
 }

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"log"
 	"miaosha/conf"
 	"miaosha/model"
 	"testing"
@@ -15,24 +14,18 @@ func init() {
 	d = New()
 }
 
-func TestDao_QueryById(t *testing.T) {
-	user, err := d.QueryByMobile("18812345678")
-	if err != nil {
+func TestDao_Get(t *testing.T) {
+	if user, err := d.Get("18800000000"); err != nil || user == nil {
 		t.Fatal(err)
 	}
-	t.Logf("%#v", user)
 }
 
-func TestDao_Save(t *testing.T) {
+func TestDao_Insert(t *testing.T) {
 	user := &model.User{
-		Mobile:       "18800000000",
-		Password:     "123456",
-		Salt:         "miaosha",
+		Mobile:       "18800000001",
 		RegisterTime: time.Now(),
 	}
-	id, err := d.Save(user)
-	if err != nil {
-		log.Fatal(err)
+	if insertId, err := d.Insert(user); err != nil || insertId == 0 {
+		t.Fatal(err)
 	}
-	t.Logf("%d", id)
 }

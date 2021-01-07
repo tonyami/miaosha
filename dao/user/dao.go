@@ -2,7 +2,8 @@ package user
 
 import (
 	"database/sql"
-	"miaosha/conf/mysql"
+	"miaosha/conf"
+	"miaosha/internal/db"
 	"miaosha/model"
 )
 
@@ -12,34 +13,43 @@ type Dao struct {
 
 func New() *Dao {
 	return &Dao{
-		db: mysql.New(),
+		db: db.New(conf.Conf.DB),
 	}
 }
 
 var (
-	_queryByMobileSql = "select id, mobile, password, salt, register_time from user where mobile = ?"
-	_saveSql          = "insert into user(mobile, password, salt, register_time) values(?, ?, ?, ?)"
+	_getSql    = `select id, mobile, register_time from user where mobile = ? limit 1`
+	_insertSql = `insert into user(mobile, register_time) values(?, ?)`
 )
 
-func (d *Dao) QueryByMobile(mobile string) (user *model.User, err error) {
+func (d *Dao) Get(mobile string) (user *model.User, err error) {
 	user = &model.User{}
-	if err = d.db.QueryRow(_queryByMobileSql, mobile).Scan(&user.Id, &user.Mobile, &user.Password, &user.Salt, &user.RegisterTime); err != nil {
+	if err = d.db.QueryRow(_getSql, mobile).Scan(&user.Id, &user.Mobile, &user.RegisterTime); err != nil {
 		if err == sql.ErrNoRows {
+			user = nil
 			err = nil
 		}
 	}
 	return
 }
 
-func (d *Dao) Save(user *model.User) (id int64, err error) {
-	stmt, err := d.db.Prepare(_saveSql)
-	if err != nil {
+func (d *Dao) Insert(user *model.User) (insertId int64, err error) {
+	var (
+		stmt *sql.Stmt
+		rs   sql.Result
+	)
+	if stmt, err = d.db.Prepare(_insertSql); err != nil {
 		return
 	}
 	defer stmt.Close()
-	ret, err := stmt.Exec(user.Mobile, user.Password, user.Salt, user.RegisterTime)
-	if err != nil {
+	if rs, err = stmt.Exec(user.Mobile, user.RegisterTime); err != nil {
 		return
 	}
-	return ret.LastInsertId()
+	if insertId, err = rs.LastInsertId(); err != nil {
+		return
+	}
+	if insertId == 0 {
+		err = sql.ErrNoRows
+	}
+	return
 }

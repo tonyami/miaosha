@@ -3,60 +3,37 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"miaosha/conf"
-	"miaosha/model"
-	"net/http"
+	"miaosha/internal/code"
 )
 
-func userRegister(c *gin.Context) {
-	mobile := c.PostForm("mobile")
-	password := c.PostForm("password")
-	user := &model.User{
-		Mobile:   mobile,
-		Password: password,
-	}
-	if err := user.Check(); err != nil {
-		c.JSON(http.StatusBadRequest, Resp{
-			Msg: err,
-		})
-		return
-	}
-	if err := userSrv.Register(user); err != nil {
-		c.JSON(http.StatusInternalServerError, Resp{
-			Msg: err,
-		})
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
-func userLogin(c *gin.Context) {
-	mobile := c.PostForm("mobile")
-	password := c.PostForm("password")
-	user := &model.User{
-		Mobile:   mobile,
-		Password: password,
-	}
-	if err := user.Check(); err != nil {
-		c.JSON(http.StatusBadRequest, Resp{
-			Msg: err,
-		})
-		return
-	}
-	token, err := userSrv.Login(user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, Resp{
-			Msg: err,
-		})
-		return
-	}
-	c.JSON(http.StatusOK, Resp{
-		Data: token,
+func SendSmsCode(c *gin.Context) {
+	r := new(struct {
+		Mobile string `form:"mobile" binding:"required"`
 	})
+	if err := c.Bind(r); err != nil {
+		return
+	}
+	if len(r.Mobile) != 11 {
+		JSON2(c, nil, code.MobileErr)
+		return
+	}
+	smsCode, err := userService.SendSmsCode(r.Mobile)
+	JSON2(c, smsCode, err)
 }
 
-func userInfo(c *gin.Context) {
+func Login(c *gin.Context) {
+	r := new(struct {
+		Mobile  string `form:"mobile" binding:"required"`
+		SmsCode string `form:"smsCode" binding:"required"`
+	})
+	if err := c.Bind(r); err != nil {
+		return
+	}
+	token, err := userService.Login(r.Mobile, r.SmsCode)
+	JSON2(c, token, err)
+}
+
+func UserInfo(c *gin.Context) {
 	user, _ := c.Get(conf.UserSession)
-	c.JSON(http.StatusOK, Resp{
-		Data: user,
-	})
+	JSON2(c, user, nil)
 }
