@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"miaosha/internal/code"
 	"miaosha/service/goods"
+	"miaosha/service/order"
 	"miaosha/service/user"
 	"net/http"
 )
@@ -11,11 +12,13 @@ import (
 var (
 	userService  *user.Service
 	goodsService *goods.Service
+	orderService *order.Service
 )
 
 func initService() {
 	userService = user.New()
 	goodsService = goods.New()
+	orderService = order.New(goodsService)
 }
 
 func initRouter(router *gin.Engine) {
@@ -25,6 +28,7 @@ func initRouter(router *gin.Engine) {
 	router.GET("/user", GetUser)
 	router.GET("/goods", GetGoodsList)
 	router.GET("/goods/:id", GetGoods)
+	router.POST("/order", Miaosha)
 }
 
 func Init() {

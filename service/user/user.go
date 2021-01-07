@@ -63,7 +63,6 @@ func (s *Service) Login(mobile, smsCode string) (token string, err error) {
 	if u == nil {
 		u = &model.User{
 			Mobile:     mobile,
-			Avatar:     conf.DefaultAvatar,
 			CreateTime: time.Now(),
 		}
 		if u.Id, err = s.dao.Insert(u); err != nil {

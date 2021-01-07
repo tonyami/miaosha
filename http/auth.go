@@ -25,7 +25,7 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Set(conf.UserSession, user)
+		c.Set(conf.User, user)
 		c.Next()
 	}
 }

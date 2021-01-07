@@ -1,10 +1,11 @@
 package key
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestCreate(t *testing.T) {
-	token := create(All, 64)
-	if len(token) != 64 {
+func TestCreateToken(t *testing.T) {
+	if token := CreateToken(); len(token) != 64 {
 		t.Fatal()
 	}
 }

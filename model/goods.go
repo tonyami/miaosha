@@ -7,13 +7,13 @@ import (
 
 // vo
 type GoodsVO struct {
-	Id          int64  `json:"id"`
-	Name        string `json:"name"`
-	Img         string `json:"img"`
-	OriginPrice int64  `json:"originPrice"`
-	Price       int64  `json:"price"`
-	Duration    int64  `json:"duration"`
-	Status      int8   `json:"status"`
+	Id          int64              `json:"id"`
+	Name        string             `json:"name"`
+	Img         string             `json:"img"`
+	OriginPrice int64              `json:"originPrice"`
+	Price       int64              `json:"price"`
+	Duration    int64              `json:"duration"`
+	Status      conf.MiaoshaStatus `json:"status"`
 }
 
 func (goods *Goods) ToVO() (goodsVO *GoodsVO) {
@@ -27,16 +27,16 @@ func (goods *Goods) ToVO() (goodsVO *GoodsVO) {
 	endTime := goods.EndTime.Unix()
 	now := time.Now().Unix()
 	if now < startTime {
-		goodsVO.Status = conf.StatusNotStarted
+		goodsVO.Status = conf.MiaoshaNotStarted
 		goodsVO.Duration = startTime - now
 	} else if now >= startTime && now <= endTime {
 		if goods.Stock > 0 {
-			goodsVO.Status = conf.StatusOnGoing
+			goodsVO.Status = conf.MiaoshaOnGoing
 		} else {
-			goodsVO.Status = conf.StatusSoldOut
+			goodsVO.Status = conf.MiaoshaSoldOut
 		}
 	} else {
-		goodsVO.Status = conf.StatusFinished
+		goodsVO.Status = conf.MiaoshaFinished
 	}
 	return
 }

@@ -4,12 +4,17 @@ import (
 	"bytes"
 	"crypto/rand"
 	"math/big"
+	"time"
 )
 
 const (
 	all    = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 	number = "1234567890"
 )
+
+func CreateOrderId() string {
+	return time.Now().Format("060102") + create(number, 10)
+}
 
 func CreateToken() string {
 	return create(all, 64)

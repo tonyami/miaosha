@@ -12,4 +12,11 @@ var (
 
 	// goods: [1200, 1199]
 	GoodsNotFound = New(1200, "商品不存在")
+
+	// core: [1300, 1399]
+	MiaoshaNotStarted = New(1300, "秒杀未开始")
+	MiaoshaFinished   = New(1311, "秒杀已结束")
+	MiaoshaSoldOut    = New(1322, "秒杀失败，已售罄")
+	MiaoshaRepeated   = New(1333, "秒杀失败，重复秒杀")
+	MiaoshaFailed     = New(1344, "秒杀失败")
 )

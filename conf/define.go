@@ -13,11 +13,22 @@ const (
 )
 
 const (
-	DefaultAvatar    = "default.jpg"
-	UserSession      = "X-User-Session" // user session
-	PageSize         = 10               // 商品列表分页大小
-	StatusNotStarted = 0                // 秒杀状态：未开始
-	StatusOnGoing    = 1                // 秒杀状态：进行中
-	StatusSoldOut    = 2                // 秒杀状态：售罄
-	StatusFinished   = 3                // 秒杀状态：已结束
+	User     = "X-User"
+	PageSize = 10 // 商品列表分页大小
+)
+
+type MiaoshaStatus int8
+
+const (
+	MiaoshaNotStarted MiaoshaStatus = 0 // 秒杀状态：未开始
+	MiaoshaOnGoing    MiaoshaStatus = 1 // 秒杀状态：进行中
+	MiaoshaSoldOut    MiaoshaStatus = 2 // 秒杀状态：售罄
+	MiaoshaFinished   MiaoshaStatus = 3 // 秒杀状态：已结束
+)
+
+type OrderStatus int8
+
+const (
+	OrderPayWaiting OrderStatus = 1 // 订单状态：秒杀成功，待支付
+	OrderPaySuccess OrderStatus = 2 // 订单状态：支付成功
 )

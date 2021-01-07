@@ -30,5 +30,5 @@ func GetGoods(c *gin.Context) {
 		JSON2(c, nil, err)
 		return
 	}
-	JSON2(c, goods, nil)
+	JSON2(c, goods.ToVO(), nil)
 }

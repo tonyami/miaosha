@@ -42,7 +42,7 @@ func Login(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	user, ok := c.Get(conf.UserSession)
+	user, ok := c.Get(conf.User)
 	if !ok {
 		JSON2(c, nil, code.Unauthorized)
 		return
