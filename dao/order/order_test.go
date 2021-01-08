@@ -2,8 +2,8 @@ package order
 
 import (
 	"miaosha/conf"
+	"miaosha/internal/key"
 	"miaosha/model"
-	"miaosha/util/key"
 	"testing"
 	"time"
 )

@@ -5,10 +5,10 @@ import (
 	"miaosha/conf"
 	"miaosha/dao/order"
 	"miaosha/internal/code"
+	"miaosha/internal/key"
 	"miaosha/model"
 	"miaosha/service/goods"
 	"miaosha/service/user"
-	"miaosha/util/key"
 	"time"
 )
 

@@ -2,19 +2,14 @@ package goods
 
 import (
 	"database/sql"
-	"miaosha/conf"
 	"miaosha/internal/db"
 	"miaosha/model"
 )
 
-type Dao struct {
-	db *sql.DB
-}
+type Dao struct{}
 
 func New() *Dao {
-	return &Dao{
-		db: db.New(conf.Conf.DB),
-	}
+	return &Dao{}
 }
 
 var (
@@ -25,7 +20,7 @@ var (
 )
 
 func (d *Dao) GetList(page, size int) (list []*model.Goods, err error) {
-	stmt, err := d.db.Prepare(_getListSql)
+	stmt, err := db.Conn().Prepare(_getListSql)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +42,7 @@ func (d *Dao) GetList(page, size int) (list []*model.Goods, err error) {
 }
 
 func (d *Dao) Get(goodsId int64) (goods *model.Goods, err error) {
-	stmt, err := d.db.Prepare(_getSql)
+	stmt, err := db.Conn().Prepare(_getSql)
 	if err != nil {
 		return
 	}

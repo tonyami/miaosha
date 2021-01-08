@@ -2,7 +2,6 @@ package order
 
 import (
 	"database/sql"
-	"miaosha/conf"
 	"miaosha/internal/code"
 	"miaosha/internal/db"
 	"miaosha/model"
@@ -13,9 +12,7 @@ type Dao struct {
 }
 
 func New() *Dao {
-	return &Dao{
-		db: db.New(conf.Conf.DB),
-	}
+	return &Dao{}
 }
 
 var (
@@ -28,7 +25,7 @@ func (d *Dao) Count(userId, goodsId int64) (count int64, err error) {
 	var (
 		stmt *sql.Stmt
 	)
-	if stmt, err = d.db.Prepare(_countSql); err != nil {
+	if stmt, err = db.Conn().Prepare(_countSql); err != nil {
 		return
 	}
 	if err = stmt.QueryRow(userId, goodsId).Scan(&count); err != nil {
@@ -43,7 +40,7 @@ func (d *Dao) Miaosha(order *model.Order) (err error) {
 		rs, rs1   sql.Result
 		aff, aff1 int64
 	)
-	if tx, err = d.db.Begin(); err != nil {
+	if tx, err = db.Conn().Begin(); err != nil {
 		return
 	}
 	defer tx.Rollback()

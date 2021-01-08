@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNew(t *testing.T) {
+func TestInit(t *testing.T) {
 	conf.Init()
-	New(conf.Conf.DB)
+	Init()
 }
