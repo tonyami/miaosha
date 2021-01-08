@@ -29,7 +29,7 @@ func New() *Service {
 
 func (s *Service) SendSmsCode(mobile string) (smsCode string, err error) {
 	// 1、生成验证码
-	smsCode = key.CreateSmsCode()
+	smsCode = key.SmsCode()
 	// 2、保存验证码
 	if sc := s.redisCli.Set(context.Background(), fmt.Sprintf(conf.SmsCodeKey, mobile), smsCode, conf.SmsCodeIn); sc.Err() != nil && sc.Err() != redis.Nil {
 		log.Printf("SendSmsCode Failed: %s", sc.Err())
@@ -72,7 +72,7 @@ func (s *Service) Login(mobile, smsCode string) (token string, err error) {
 		}
 	}
 	// 5、生成token
-	token = key.CreateToken()
+	token = key.Token()
 	// 6、序列化用户对象，并保存到缓存中
 	bytes, _ := json.Marshal(u)
 	if sc2 := s.redisCli.Set(context.Background(), fmt.Sprintf(conf.TokenKey, token), string(bytes), conf.TokenIn); sc2.Err() != nil && sc2.Err() != redis.Nil {

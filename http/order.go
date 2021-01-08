@@ -18,10 +18,10 @@ func Miaosha(c *gin.Context) {
 		return
 	}
 	u := user.(*model.User)
-	order, err := orderService.Miaosha(u.Id, r.GoodsId)
+	orderId, err := orderService.Miaosha(u.Id, r.GoodsId)
 	if err != nil {
 		JSON2(c, nil, err)
 		return
 	}
-	JSON2(c, order, nil)
+	JSON2(c, orderId, nil)
 }

@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestCreateToken(t *testing.T) {
-	if token := CreateToken(); len(token) != 64 {
+func TestToken(t *testing.T) {
+	if token := Token(); len(token) != 64 {
 		t.Fatal()
 	}
 }

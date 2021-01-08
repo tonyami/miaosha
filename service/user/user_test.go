@@ -13,7 +13,7 @@ func init() {
 }
 
 func TestService_Login(t *testing.T) {
-	if token, err := s.Login("18800000000", "123456"); err != nil || len(token) == 0 {
+	if _, err := s.Login("18800000000", "123456"); err != nil {
 		t.Fatal(err)
 	}
 }

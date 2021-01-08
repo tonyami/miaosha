@@ -35,7 +35,9 @@ func Init() {
 	initService()
 	router := gin.Default()
 	initRouter(router)
-	router.Run()
+	if err := router.Run(); err != nil {
+		panic(err)
+	}
 }
 
 func JSON2(c *gin.Context, data interface{}, err error) {

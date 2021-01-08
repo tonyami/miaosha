@@ -12,15 +12,15 @@ const (
 	number = "1234567890"
 )
 
-func CreateOrderId() string {
+func OrderId() string {
 	return time.Now().Format("060102") + create(number, 10)
 }
 
-func CreateToken() string {
+func Token() string {
 	return create(all, 64)
 }
 
-func CreateSmsCode() string {
+func SmsCode() string {
 	return create(number, 6)
 }
 

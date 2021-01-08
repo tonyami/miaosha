@@ -33,7 +33,7 @@ func initEnv() (c *Config) {
 		Host:     os.Getenv("MIAOSHA_DB_HOST"),
 		User:     os.Getenv("MIAOSHA_DB_USER"),
 		Password: os.Getenv("MIAOSHA_DB_PASSWORD"),
-		Name:     os.Getenv("MIAOSHA_DB_Name"),
+		Name:     os.Getenv("MIAOSHA_DB_NAME"),
 	}
 	Conf.Redis = &Redis{
 		Host:     os.Getenv("MIAOSHA_REDIS_HOST"),

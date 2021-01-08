@@ -15,7 +15,7 @@ func init() {
 }
 
 func TestService_Miaosha(t *testing.T) {
-	if order, err := s.Miaosha(1, 4); err != nil || order == nil {
+	if _, err := s.Miaosha(1, 6); err != nil {
 		t.Fatal(err)
 	}
 }

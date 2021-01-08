@@ -2,6 +2,7 @@ package model
 
 import (
 	"miaosha/conf"
+	"miaosha/internal/code"
 	"time"
 )
 
@@ -37,6 +38,20 @@ func (goods *Goods) ToVO() (goodsVO *GoodsVO) {
 		}
 	} else {
 		goodsVO.Status = conf.MiaoshaFinished
+	}
+	return
+}
+
+func (goods *Goods) Check() (err error) {
+	now := time.Now().Unix()
+	startTime := goods.StartTime.Unix()
+	endTime := goods.EndTime.Unix()
+	if now < startTime {
+		err = code.MiaoshaNotStarted
+	} else if now > endTime {
+		err = code.MiaoshaFinished
+	} else if goods.Stock <= 0 {
+		err = code.MiaoshaSoldOut
 	}
 	return
 }

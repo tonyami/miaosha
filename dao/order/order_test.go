@@ -17,14 +17,11 @@ func init() {
 
 func TestDao_Miaosha(t *testing.T) {
 	order := &model.Order{
-		Id:         key.CreateOrderId(),
+		Id:         key.OrderId(),
 		UserId:     1,
-		GoodsId:    4,
-		GoodsName:  "棒棒糖（荔枝味）",
-		GoodsImg:   "/static/sugar.jpg",
-		Price:      10,
+		GoodsId:    5,
 		CreateTime: time.Now(),
-		Status:     conf.OrderPayWaiting,
+		Status:     conf.OrderUnPaid,
 	}
 	if err := d.Miaosha(order); err != nil {
 		t.Fatal(err)

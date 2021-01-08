@@ -19,10 +19,9 @@ func New() *Dao {
 }
 
 var (
-	_countSql       = `select count(1) from miaosha_order where user_id = ? and goods_id = ?`
-	_decrStockSql   = `update miaosha_goods set stock = stock - 1 where id = ? and stock > 0`
-	_createOrderSql = `insert into miaosha_order(id, user_id, goods_id, goods_name, goods_img, price, create_time, status) 
-						values(?, ?, ?, ?, ?, ?, ?, ?)`
+	_countSql     = `select count(1) from miaosha_order where user_id = ? and goods_id = ?`
+	_decrStockSql = `update miaosha_goods set stock = stock - 1 where id = ? and stock > 0`
+	_insertSql    = `insert into miaosha_order(id, user_id, goods_id, create_time, status) values(?, ?, ?, ?, ?)`
 )
 
 func (d *Dao) Count(userId, goodsId int64) (count int64, err error) {
@@ -56,7 +55,7 @@ func (d *Dao) Miaosha(order *model.Order) (err error) {
 		return
 	}
 	// 生成订单
-	if rs1, err = tx.Exec(_createOrderSql, order.Id, order.UserId, order.GoodsId, order.GoodsName, order.GoodsImg, order.Price, order.CreateTime, order.Status); err != nil {
+	if rs1, err = tx.Exec(_insertSql, order.Id, order.UserId, order.GoodsId, order.CreateTime, order.Status); err != nil {
 		return
 	}
 	if aff1, err = rs1.RowsAffected(); err != nil {

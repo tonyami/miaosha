@@ -29,6 +29,6 @@ const (
 type OrderStatus int8
 
 const (
-	OrderPayWaiting OrderStatus = 1 // 订单状态：秒杀成功，待支付
-	OrderPaySuccess OrderStatus = 2 // 订单状态：支付成功
+	OrderUnPaid OrderStatus = 0 // 订单状态：未支付
+	OrderPaid   OrderStatus = 1 // 订单状态：已支付
 )
