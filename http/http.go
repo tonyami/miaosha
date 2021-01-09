@@ -22,12 +22,13 @@ func initService() {
 }
 
 func initRouter(router *gin.Engine) {
+	router.Use(Cors())
 	router.GET("/code/sms", SendSmsCode)
 	router.POST("/user/login", Login)
-	router.Use(Auth())
-	router.GET("/user", GetUser)
 	router.GET("/goods", GetGoodsList)
 	router.GET("/goods/:id", GetGoods)
+	router.Use(Auth())
+	router.GET("/user", GetUser)
 	router.POST("/order", Miaosha)
 }
 

@@ -23,7 +23,7 @@ func (goods *Goods) ToVO() (goodsVO *GoodsVO) {
 	goodsVO.OriginPrice = goods.OriginPrice
 	goodsVO.Name = goods.Name
 	goodsVO.Img = goods.Img
-	goodsVO.OriginPrice = goods.OriginPrice
+	goodsVO.Price = goods.Price
 	startTime := goods.StartTime.Unix()
 	endTime := goods.EndTime.Unix()
 	now := time.Now().Unix()
