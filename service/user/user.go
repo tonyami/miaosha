@@ -47,7 +47,7 @@ func (s *Service) Login(mobile, smsCode string) (token string, err error) {
 	var u *model.User
 	// 3、根据手机号码从数据库中查询用户
 	if u, err = s.dao.Get(mobile); err != nil {
-		log.Printf("Login Failed: %s", err)
+		log.Printf("【User】Login Failed: %s", err)
 		err = code.SystemErr
 		return
 	}
@@ -58,7 +58,7 @@ func (s *Service) Login(mobile, smsCode string) (token string, err error) {
 			CreateTime: time.Now(),
 		}
 		if u.Id, err = s.dao.Insert(u); err != nil {
-			log.Printf("Login Failed: %s", err)
+			log.Printf("【User】Login Failed: %s", err)
 			err = code.SystemErr
 			return
 		}

@@ -2,6 +2,7 @@ package goods
 
 import (
 	"miaosha/conf"
+	"miaosha/internal/db"
 	"testing"
 )
 
@@ -9,6 +10,7 @@ var d *Dao
 
 func init() {
 	conf.Init()
+	db.Init()
 	d = New()
 }
 

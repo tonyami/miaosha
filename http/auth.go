@@ -10,18 +10,18 @@ func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 		if token == "" {
-			JSON2(c, nil, code.Unauthorized)
+			json2(c, nil, code.Unauthorized)
 			c.Abort()
 			return
 		}
 		user, err := userService.Auth(token)
 		if err != nil {
-			JSON2(c, nil, err)
+			json2(c, nil, err)
 			c.Abort()
 			return
 		}
 		if user == nil {
-			JSON2(c, nil, code.Unauthorized)
+			json2(c, nil, code.Unauthorized)
 			c.Abort()
 			return
 		}

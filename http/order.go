@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"miaosha/conf"
 	"miaosha/model"
+	"strconv"
 )
 
 func Miaosha(c *gin.Context) {
@@ -19,9 +20,34 @@ func Miaosha(c *gin.Context) {
 	}
 	u := user.(*model.User)
 	orderId, err := orderService.Miaosha(u.Id, r.GoodsId)
-	if err != nil {
-		JSON2(c, nil, err)
+	json2(c, orderId, err)
+}
+
+func GetOrder(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) == 0 {
 		return
 	}
-	JSON2(c, orderId, nil)
+	user, ok := c.Get(conf.User)
+	if !ok {
+		return
+	}
+	u := user.(*model.User)
+	order, err := orderService.Get(id, u.Id)
+	json2(c, order, err)
+}
+
+func GetOrderList(c *gin.Context) {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		page = 1
+	}
+	status := c.Query("status")
+	user, ok := c.Get(conf.User)
+	if !ok {
+		return
+	}
+	u := user.(*model.User)
+	orders, err := orderService.GetList(u.Id, page, status)
+	json2(c, orders, err)
 }

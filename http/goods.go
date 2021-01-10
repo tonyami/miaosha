@@ -11,24 +11,20 @@ func GetGoodsList(c *gin.Context) {
 	if err != nil {
 		page = 1
 	}
-	goodsList, err := goodsService.GetGoodsList(page)
-	if err != nil {
-		JSON2(c, nil, err)
-		return
-	}
-	JSON2(c, goodsList, nil)
+	goodsList, err := goodsService.GetList(page)
+	json2(c, goodsList, err)
 }
 
 func GetGoods(c *gin.Context) {
 	goodsId, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		JSON2(c, nil, code.GoodsNotFound)
+		json2(c, nil, code.GoodsNotFound)
 		return
 	}
-	goods, err := goodsService.GetGoods(goodsId)
+	goods, err := goodsService.Get(goodsId)
 	if err != nil {
-		JSON2(c, nil, err)
+		json2(c, nil, err)
 		return
 	}
-	JSON2(c, goods.ToVO(), nil)
+	json2(c, goods.ToVO(), nil)
 }

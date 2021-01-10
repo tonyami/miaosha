@@ -30,6 +30,8 @@ func initRouter(router *gin.Engine) {
 	router.Use(Auth())
 	router.GET("/user", GetUser)
 	router.POST("/order", Miaosha)
+	router.GET("/order/:id", GetOrder)
+	router.GET("/orders", GetOrderList)
 }
 
 func Init() {
@@ -41,7 +43,7 @@ func Init() {
 	}
 }
 
-func JSON2(c *gin.Context, data interface{}, err error) {
+func json2(c *gin.Context, data interface{}, err error) {
 	if err != nil {
 		ec := code.String(err.Error())
 		c.JSON(http.StatusOK, gin.H{

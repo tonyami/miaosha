@@ -2,6 +2,7 @@ package user
 
 import (
 	"miaosha/conf"
+	"miaosha/internal/db"
 	"testing"
 )
 
@@ -9,6 +10,7 @@ var s *Service
 
 func init() {
 	conf.Init()
+	db.Init()
 	s = New()
 }
 

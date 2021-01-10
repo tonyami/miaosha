@@ -18,10 +18,10 @@ func New() *Service {
 	}
 }
 
-func (s *Service) GetGoodsList(page int) (goodsList []*model.GoodsVO, err error) {
+func (s *Service) GetList(page int) (goodsList []*model.GoodsVO, err error) {
 	goodsDTOList, err := s.dao.GetList(page, conf.PageSize)
 	if err != nil {
-		log.Printf("GetGoodsList Failed: %s", err)
+		log.Printf("【Goods】GetList Failed: %s", err)
 		err = code.SystemErr
 		return
 	}
@@ -32,9 +32,9 @@ func (s *Service) GetGoodsList(page int) (goodsList []*model.GoodsVO, err error)
 	return
 }
 
-func (s *Service) GetGoods(goodsId int64) (goods *model.Goods, err error) {
+func (s *Service) Get(goodsId int64) (goods *model.Goods, err error) {
 	if goods, err = s.dao.Get(goodsId); err != nil {
-		log.Printf("GetGoods Failed: %s", err)
+		log.Printf("【Goods】Get Failed: %s", err)
 		err = code.SystemErr
 		return
 	}

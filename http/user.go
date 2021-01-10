@@ -14,11 +14,11 @@ func SendSmsCode(c *gin.Context) {
 		return
 	}
 	if len(r.Mobile) != 11 {
-		JSON2(c, nil, code.MobileErr)
+		json2(c, nil, code.MobileErr)
 		return
 	}
 	smsCode, err := userService.SendSmsCode(r.Mobile)
-	JSON2(c, smsCode, err)
+	json2(c, smsCode, err)
 }
 
 func Login(c *gin.Context) {
@@ -30,22 +30,22 @@ func Login(c *gin.Context) {
 		return
 	}
 	if len(r.Mobile) != 11 {
-		JSON2(c, nil, code.MobileErr)
+		json2(c, nil, code.MobileErr)
 		return
 	}
 	if len(r.SmsCode) != 6 {
-		JSON2(c, nil, code.CodeErr)
+		json2(c, nil, code.CodeErr)
 		return
 	}
 	token, err := userService.Login(r.Mobile, r.SmsCode)
-	JSON2(c, token, err)
+	json2(c, token, err)
 }
 
 func GetUser(c *gin.Context) {
 	user, ok := c.Get(conf.User)
 	if !ok {
-		JSON2(c, nil, code.Unauthorized)
+		json2(c, nil, code.Unauthorized)
 		return
 	}
-	JSON2(c, user, nil)
+	json2(c, user, nil)
 }

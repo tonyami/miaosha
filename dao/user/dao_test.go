@@ -2,6 +2,7 @@ package user
 
 import (
 	"miaosha/conf"
+	"miaosha/internal/db"
 	"miaosha/model"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ var d *Dao
 
 func init() {
 	conf.Init()
+	db.Init()
 	d = New()
 }
 
