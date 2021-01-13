@@ -52,7 +52,7 @@ func (s *Service) GetList(userId int64, page int, status string) (orders []*mode
 func (s *Service) Miaosha(userId int64, goodsId int64) (orderId string, err error) {
 	var g *model.Goods
 	// 1、查询秒杀商品
-	if g, err = s.goodsService.GetGoods(goodsId); err != nil {
+	if g, err = s.goodsService.Get(goodsId); err != nil {
 		return
 	}
 	// 2、校验秒杀开始时间、结束时间、库存
