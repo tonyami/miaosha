@@ -17,6 +17,18 @@ func init() {
 	d = New()
 }
 
+func TestDao_Close(t *testing.T) {
+	order := model.OrderDTO{
+		Id:        "2101082621259341",
+		Status:    conf.OrderUnPaid,
+		CloseTime: time.Now(),
+		GoodsId:   4,
+	}
+	if err := d.Close(&order); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestDao_Get(t *testing.T) {
 	if order, err := d.Get("2101086726742339"); err != nil || order == nil {
 		t.Fatal(err)
@@ -24,7 +36,7 @@ func TestDao_Get(t *testing.T) {
 }
 
 func TestDao_GetList(t *testing.T) {
-	if orders, err := d.GetList(1, 1, 10); err != nil || len(orders) == 0 {
+	if orders, err := d.GetList(1, 1, 10, ""); err != nil || len(orders) == 0 {
 		t.Fatal(err)
 	}
 }

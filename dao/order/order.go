@@ -2,29 +2,67 @@ package order
 
 import (
 	"database/sql"
-	"miaosha/internal/code"
+	"miaosha/conf"
 	"miaosha/internal/db"
 	"miaosha/model"
 )
 
-type Dao struct{}
+type Dao struct {
+	db *sql.DB
+}
 
 func New() *Dao {
-	return &Dao{}
+	return &Dao{
+		db: db.Conn(),
+	}
 }
 
 var (
+	_closeSql     = `update miaosha_order set status = ?, close_time = ? where id = ? and status = ?`
+	_incrStockSql = `update miaosha_goods set stock = stock + 1 where id = ?`
 	_getSql       = `select o.id, o.user_id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.id = ? limit 1`
 	_getListSql   = `select o.id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.user_id = ? order by o.create_time desc limit ?, ?`
 	_getList2Sql  = `select o.id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.user_id = ? and o.status = ? order by o.create_time desc limit ?, ?`
-	_countSql     = `select count(1) from miaosha_order where user_id = ? and goods_id = ?`
+	_countSql     = `select count(1) from miaosha_order where user_id = ? and goods_id = ? and status != ?`
 	_decrStockSql = `update miaosha_goods set stock = stock - 1 where id = ? and stock > 0`
 	_insertSql    = `insert into miaosha_order(id, user_id, goods_id, create_time, status) values(?, ?, ?, ?, ?)`
 )
 
-func (*Dao) Get(id string) (order *model.OrderDTO, err error) {
+func (d *Dao) Close(order *model.OrderDTO) (err error) {
+	var (
+		tx         *sql.Tx
+		rs1, rs2   sql.Result
+		aff1, aff2 int64
+	)
+	if tx, err = d.db.Begin(); err != nil {
+		return
+	}
+	defer tx.Rollback()
+	// 关闭订单
+	if rs1, err = d.db.Exec(_closeSql, conf.OrderClosed, order.CloseTime, order.Id, order.Status); err != nil {
+		return
+	}
+	if aff1, err = rs1.RowsAffected(); err != nil {
+		return
+	}
+	// 加库存
+	if rs2, err = tx.Exec(_incrStockSql, order.GoodsId); err != nil {
+		return
+	}
+	if aff2, err = rs2.RowsAffected(); err != nil {
+		return
+	}
+	if aff1 == 0 || aff2 == 0 {
+		err = sql.ErrNoRows
+		return
+	}
+	err = tx.Commit()
+	return
+}
+
+func (d *Dao) Get(id string) (order *model.OrderDTO, err error) {
 	var stmt *sql.Stmt
-	if stmt, err = db.Conn().Prepare(_getSql); err != nil {
+	if stmt, err = d.db.Prepare(_getSql); err != nil {
 		return
 	}
 	order = &model.OrderDTO{}
@@ -37,13 +75,13 @@ func (*Dao) Get(id string) (order *model.OrderDTO, err error) {
 	return
 }
 
-func (*Dao) GetList(userId int64, page, size int, status string) (orders []*model.OrderDTO, err error) {
+func (d *Dao) GetList(userId int64, page, size int, status string) (orders []*model.OrderDTO, err error) {
 	var (
 		stmt *sql.Stmt
 		rows *sql.Rows
 	)
 	if len(status) == 0 {
-		if stmt, err = db.Conn().Prepare(_getListSql); err != nil {
+		if stmt, err = d.db.Prepare(_getListSql); err != nil {
 			return
 		}
 		defer stmt.Close()
@@ -72,26 +110,26 @@ func (*Dao) GetList(userId int64, page, size int, status string) (orders []*mode
 	return
 }
 
-func (*Dao) Count(userId, goodsId int64) (count int64, err error) {
+func (d *Dao) Count(userId, goodsId int64) (count int64, err error) {
 	var (
 		stmt *sql.Stmt
 	)
-	if stmt, err = db.Conn().Prepare(_countSql); err != nil {
+	if stmt, err = d.db.Prepare(_countSql); err != nil {
 		return
 	}
-	if err = stmt.QueryRow(userId, goodsId).Scan(&count); err != nil {
+	if err = stmt.QueryRow(userId, goodsId, conf.OrderClosed).Scan(&count); err != nil {
 		return
 	}
 	return
 }
 
-func (*Dao) Miaosha(order *model.Order) (err error) {
+func (d *Dao) Miaosha(order *model.Order) (err error) {
 	var (
 		tx        *sql.Tx
 		rs, rs1   sql.Result
 		aff, aff1 int64
 	)
-	if tx, err = db.Conn().Begin(); err != nil {
+	if tx, err = d.db.Begin(); err != nil {
 		return
 	}
 	defer tx.Rollback()
@@ -110,7 +148,7 @@ func (*Dao) Miaosha(order *model.Order) (err error) {
 		return
 	}
 	if aff == 0 || aff1 == 0 {
-		err = code.MiaoshaFailed
+		err = sql.ErrNoRows
 		return
 	}
 	err = tx.Commit()

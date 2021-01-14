@@ -25,6 +25,32 @@ func New(goodsService *goods.Service) *Service {
 	}
 }
 
+func (s *Service) Cancel(orderId string, userId int64) (err error) {
+	var o *model.OrderDTO
+	if o, err = s.dao.Get(orderId); err != nil {
+		log.Printf("【Order】Close Failed: %s", err)
+		err = code.SystemErr
+	}
+	if o == nil {
+		err = code.OrderNotFound
+		return
+	}
+	if o.UserId != userId {
+		err = code.Denied
+		return
+	}
+	if o.Status != conf.OrderUnPaid {
+		err = code.OrderCannotClose
+		return
+	}
+	o.CloseTime = time.Now()
+	if err = s.dao.Close(o); err != nil {
+		log.Printf("【Order】Close Failed: %s", err)
+		err = code.OrderCloseFailed
+	}
+	return
+}
+
 func (s *Service) Get(orderId string, userId int64) (order *model.OrderDTO, err error) {
 	if order, err = s.dao.Get(orderId); err != nil {
 		log.Printf("【Order】Get Failed: %s", err)
@@ -33,9 +59,14 @@ func (s *Service) Get(orderId string, userId int64) (order *model.OrderDTO, err 
 	if order == nil {
 		err = code.OrderNotFound
 	}
-	// 禁止访问非本人订单
+	// 禁止访问非本人订单，防止水平越权
 	if order.UserId != userId {
 		err = code.Denied
+	}
+	if order.Status == conf.OrderUnPaid {
+		if time.Now().Unix()-order.CreateTime.Unix() < conf.OrderExpire {
+			order.Duration = order.CreateTime.Unix() + conf.OrderExpire - time.Now().Unix()
+		}
 	}
 	return
 }

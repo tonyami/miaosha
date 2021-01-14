@@ -51,3 +51,19 @@ func GetOrderList(c *gin.Context) {
 	orders, err := orderService.GetList(u.Id, page, status)
 	json2(c, orders, err)
 }
+
+func OrderCancel(c *gin.Context) {
+	r := new(struct {
+		Id string `form:"id" binding:"required"`
+	})
+	if err := c.Bind(r); err != nil {
+		return
+	}
+	user, ok := c.Get(conf.User)
+	if !ok {
+		return
+	}
+	u := user.(*model.User)
+	err := orderService.Cancel(r.Id, u.Id)
+	json2(c, nil, err)
+}

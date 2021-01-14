@@ -6,10 +6,14 @@ import (
 	"miaosha/model"
 )
 
-type Dao struct{}
+type Dao struct {
+	db *sql.DB
+}
 
 func New() *Dao {
-	return &Dao{}
+	return &Dao{
+		db: db.Conn(),
+	}
 }
 
 var (
@@ -17,9 +21,9 @@ var (
 	_insertSql = `insert into miaosha_user(mobile, create_time) values(?, ?)`
 )
 
-func (*Dao) Get(mobile string) (user *model.User, err error) {
+func (d *Dao) Get(mobile string) (user *model.User, err error) {
 	user = &model.User{}
-	if err = db.Conn().QueryRow(_getSql, mobile).Scan(&user.Id, &user.Mobile, &user.CreateTime); err != nil {
+	if err = d.db.QueryRow(_getSql, mobile).Scan(&user.Id, &user.Mobile, &user.CreateTime); err != nil {
 		user = nil
 		if err == sql.ErrNoRows {
 			err = nil
@@ -28,12 +32,12 @@ func (*Dao) Get(mobile string) (user *model.User, err error) {
 	return
 }
 
-func (*Dao) Insert(user *model.User) (insertId int64, err error) {
+func (d *Dao) Insert(user *model.User) (insertId int64, err error) {
 	var (
 		stmt *sql.Stmt
 		rs   sql.Result
 	)
-	if stmt, err = db.Conn().Prepare(_insertSql); err != nil {
+	if stmt, err = d.db.Prepare(_insertSql); err != nil {
 		return
 	}
 	defer stmt.Close()

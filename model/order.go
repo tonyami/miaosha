@@ -13,7 +13,9 @@ type OrderDTO struct {
 	Img        string           `json:"img"`
 	Price      int64            `json:"price"`
 	Status     conf.OrderStatus `json:"status"`
+	Duration   int64            `json:"duration"`
 	CreateTime time.Time        `json:"createTime"`
+	CloseTime  time.Time        `json:"-"`
 }
 
 type Order struct {
@@ -22,4 +24,5 @@ type Order struct {
 	GoodsId    int64
 	Status     conf.OrderStatus
 	CreateTime time.Time
+	CloseTime  time.Time
 }

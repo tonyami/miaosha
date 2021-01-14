@@ -16,6 +16,12 @@ func init() {
 	s = New(goodsService)
 }
 
+func TestService_Cancel(t *testing.T) {
+	if err := s.Cancel("2101142433626219", 2); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestService_Get(t *testing.T) {
 	if order, err := s.Get("2101086726742339", 1); err != nil || order == nil {
 		t.Fatal(err)

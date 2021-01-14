@@ -21,4 +21,6 @@ var (
 	MiaoshaRepeated   = New(1333, "请勿重复秒杀")
 	MiaoshaFailed     = New(1344, "秒杀失败")
 	OrderNotFound     = New(1355, "订单不存在")
+	OrderCannotClose  = New(1366, "订单取消失败：状态错误")
+	OrderCloseFailed  = New(1377, "订单取消失败")
 )
