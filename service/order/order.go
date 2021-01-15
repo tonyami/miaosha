@@ -26,7 +26,7 @@ func New(goodsService *goods.Service) *Service {
 }
 
 func (s *Service) Cancel(orderId string, userId int64) (err error) {
-	var o *model.OrderDTO
+	var o *model.Order
 	if o, err = s.dao.Get(orderId); err != nil {
 		log.Printf("【Order】Close Failed: %s", err)
 		err = code.SystemErr
@@ -43,7 +43,6 @@ func (s *Service) Cancel(orderId string, userId int64) (err error) {
 		err = code.OrderCannotClose
 		return
 	}
-	o.CloseTime = time.Now()
 	if err = s.dao.Close(o); err != nil {
 		log.Printf("【Order】Close Failed: %s", err)
 		err = code.OrderCloseFailed
@@ -52,7 +51,7 @@ func (s *Service) Cancel(orderId string, userId int64) (err error) {
 }
 
 func (s *Service) Get(orderId string, userId int64) (order *model.OrderDTO, err error) {
-	if order, err = s.dao.Get(orderId); err != nil {
+	if order, err = s.dao.GetDTO(orderId); err != nil {
 		log.Printf("【Order】Get Failed: %s", err)
 		err = code.SystemErr
 	}

@@ -18,9 +18,10 @@ func New() *Dao {
 }
 
 var (
-	_closeSql     = `update miaosha_order set status = ?, close_time = ? where id = ? and status = ?`
+	_closeSql     = `update miaosha_order set status = ?, close_time = now() where id = ? and status = ?`
 	_incrStockSql = `update miaosha_goods set stock = stock + 1 where id = ?`
-	_getSql       = `select o.id, o.user_id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.id = ? limit 1`
+	_getSql       = `select id, user_id, goods_id, create_time, status from miaosha_order where id = ? limit 1`
+	_getDTOSql    = `select o.id, o.user_id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.id = ? limit 1`
 	_getListSql   = `select o.id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.user_id = ? order by o.create_time desc limit ?, ?`
 	_getList2Sql  = `select o.id, o.goods_id, g.name, g.img, g.price, o.create_time, o.status from miaosha_order o left join miaosha_goods g on o.goods_id = g.id where o.user_id = ? and o.status = ? order by o.create_time desc limit ?, ?`
 	_countSql     = `select count(1) from miaosha_order where user_id = ? and goods_id = ? and status != ?`
@@ -28,7 +29,7 @@ var (
 	_insertSql    = `insert into miaosha_order(id, user_id, goods_id, create_time, status) values(?, ?, ?, ?, ?)`
 )
 
-func (d *Dao) Close(order *model.OrderDTO) (err error) {
+func (d *Dao) Close(order *model.Order) (err error) {
 	var (
 		tx         *sql.Tx
 		rs1, rs2   sql.Result
@@ -39,7 +40,7 @@ func (d *Dao) Close(order *model.OrderDTO) (err error) {
 	}
 	defer tx.Rollback()
 	// 关闭订单
-	if rs1, err = d.db.Exec(_closeSql, conf.OrderClosed, order.CloseTime, order.Id, order.Status); err != nil {
+	if rs1, err = d.db.Exec(_closeSql, conf.OrderClosed, order.Id, order.Status); err != nil {
 		return
 	}
 	if aff1, err = rs1.RowsAffected(); err != nil {
@@ -60,9 +61,24 @@ func (d *Dao) Close(order *model.OrderDTO) (err error) {
 	return
 }
 
-func (d *Dao) Get(id string) (order *model.OrderDTO, err error) {
+func (d *Dao) Get(id string) (order *model.Order, err error) {
 	var stmt *sql.Stmt
 	if stmt, err = d.db.Prepare(_getSql); err != nil {
+		return
+	}
+	order = &model.Order{}
+	if err = stmt.QueryRow(id).Scan(&order.Id, &order.UserId, &order.GoodsId, &order.CreateTime, &order.Status); err != nil {
+		order = nil
+		if err == sql.ErrNoRows {
+			err = nil
+		}
+	}
+	return
+}
+
+func (d *Dao) GetDTO(id string) (order *model.OrderDTO, err error) {
+	var stmt *sql.Stmt
+	if stmt, err = d.db.Prepare(_getDTOSql); err != nil {
 		return
 	}
 	order = &model.OrderDTO{}
