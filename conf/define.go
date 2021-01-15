@@ -9,9 +9,10 @@ const (
 )
 
 const (
-	User        = "X-User"
-	PageSize    = 10
-	OrderExpire = 1800
+	User                   = "X-User"
+	PageSize               = 10  // 默认分页大小
+	OrderExpire            = 600 // 订单有效期，过期未付自动关闭
+	OrderSchedulerInterval = 120 // 超时订单扫描间隔
 )
 
 type MiaoshaStatus int8

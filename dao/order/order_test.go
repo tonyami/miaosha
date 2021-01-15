@@ -17,6 +17,14 @@ func init() {
 	d = New()
 }
 
+func TestDao_GetOvertimeList(t *testing.T) {
+	ids, err := d.GetOvertimeList(60)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%s", ids)
+}
+
 func TestDao_Close(t *testing.T) {
 	order := model.Order{
 		Id:      "2101082621259341",

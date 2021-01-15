@@ -18,6 +18,7 @@ func New() *Dao {
 }
 
 var (
+	_overtimeSql  = `select id from miaosha_order where status = ? and unix_timestamp(now()) - unix_timestamp(create_time) > ?`
 	_closeSql     = `update miaosha_order set status = ?, close_time = now() where id = ? and status = ?`
 	_incrStockSql = `update miaosha_goods set stock = stock + 1 where id = ?`
 	_getSql       = `select id, user_id, goods_id, create_time, status from miaosha_order where id = ? limit 1`
@@ -28,6 +29,29 @@ var (
 	_decrStockSql = `update miaosha_goods set stock = stock - 1 where id = ? and stock > 0`
 	_insertSql    = `insert into miaosha_order(id, user_id, goods_id, create_time, status) values(?, ?, ?, ?, ?)`
 )
+
+func (d *Dao) GetOvertimeList(expire int) (ids []string, err error) {
+	var (
+		stmt *sql.Stmt
+		rows *sql.Rows
+	)
+	if stmt, err = d.db.Prepare(_overtimeSql); err != nil {
+		return
+	}
+	defer stmt.Close()
+	ids = make([]string, 0)
+	if rows, err = stmt.Query(conf.OrderUnPaid, expire); err != nil {
+		return
+	}
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return
+		}
+		ids = append(ids, id)
+	}
+	return
+}
 
 func (d *Dao) Close(order *model.Order) (err error) {
 	var (
