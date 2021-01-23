@@ -28,7 +28,7 @@ func TestDao_GetOvertimeList(t *testing.T) {
 func TestDao_Close(t *testing.T) {
 	order := model.Order{
 		Id:      "2101082621259341",
-		Status:  conf.OrderUnPaid,
+		Status:  conf.OrderWaitPay,
 		GoodsId: 4,
 	}
 	if err := d.Close(&order); err != nil {

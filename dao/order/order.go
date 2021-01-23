@@ -40,7 +40,7 @@ func (d *Dao) GetOvertimeList(expire int) (ids []string, err error) {
 	}
 	defer stmt.Close()
 	ids = make([]string, 0)
-	if rows, err = stmt.Query(conf.OrderUnPaid, expire); err != nil {
+	if rows, err = stmt.Query(conf.OrderWaitPay, expire); err != nil {
 		return
 	}
 	for rows.Next() {

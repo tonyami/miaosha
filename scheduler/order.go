@@ -16,16 +16,21 @@ var (
 // 生产者：查询超时订单
 func orderProducer(orderChannel chan<- string) {
 	for {
-		ids, err := orderDao.GetOvertimeList(conf.OrderExpire)
-		if err != nil {
-			log.Printf("【Scheduler】GetOvertimeList Failed: %s", err)
-		}
-		for i := range ids {
-			log.Printf("【Scheduler】订单超时: %s", ids[i])
-			orderChannel <- ids[i]
-		}
 		// 指定时间扫描一次
 		time.Sleep(conf.OrderSchedulerInterval * time.Second)
+		ids, err := orderDao.GetOvertimeList(conf.OrderExpire)
+		if err != nil {
+			log.Printf("【Scheduler】查询超时订单失败: %s", err)
+			continue
+		}
+		if len(ids) == 0 {
+			log.Printf("【Scheduler】无订单超时")
+			continue
+		}
+		for i := range ids {
+			log.Printf("【Scheduler】超时订单: %s", ids[i])
+			orderChannel <- ids[i]
+		}
 	}
 }
 
@@ -34,12 +39,18 @@ func orderConsumer(orderChannel <-chan string) {
 	for id := range orderChannel {
 		o, err := orderDao.Get(id)
 		if err != nil {
-			log.Printf("【Scheduler】订单超时，处理失败: %s", err)
+			log.Printf("【Scheduler】获取超时订单失败: %s", err)
+			// 失败后暂停 30 秒再试，避免重复报错
+			time.Sleep(30 * time.Second)
+			continue
 		}
 		if err = orderDao.Close(o); err != nil {
-			log.Printf("【Scheduler】订单超时，处理失败: %s", err)
+			log.Printf("【Scheduler】关闭超时订单失败: %s", err)
+			// 失败后暂停 30 秒再试，避免重复报错
+			time.Sleep(30 * time.Second)
+			continue
 		}
-		log.Printf("【Scheduler】订单超时，处理成功: %s", id)
+		log.Printf("【Scheduler】已关闭超时订单: %s", id)
 	}
 }
 

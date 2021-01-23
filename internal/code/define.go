@@ -5,6 +5,7 @@ var (
 	Success      = New(0, "成功")
 	Unauthorized = New(111, "未授权")
 	Denied       = New(222, "无权限")
+	ParseErr     = New(333, "解析失败")
 	SystemErr    = New(999, "系统异常")
 
 	// user: [1100, 1199]
@@ -23,4 +24,8 @@ var (
 	OrderNotFound     = New(1355, "订单不存在")
 	OrderCannotClose  = New(1366, "订单取消失败：状态错误")
 	OrderCloseFailed  = New(1377, "订单取消失败")
+
+	// pay: [1400, 1499]
+	PayRequestErr     = New(1400, "支付请求失败")
+	PayOrderStatusErr = New(1401, "支付失败，订单状态错误")
 )

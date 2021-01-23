@@ -12,7 +12,7 @@ const (
 	User                   = "X-User"
 	PageSize               = 10  // 默认分页大小
 	OrderExpire            = 600 // 订单有效期，过期未付自动关闭
-	OrderSchedulerInterval = 120 // 超时订单扫描间隔
+	OrderSchedulerInterval = 30  // 超时订单扫描间隔
 )
 
 type MiaoshaStatus int8
@@ -27,7 +27,8 @@ const (
 type OrderStatus int8
 
 const (
-	OrderClosed OrderStatus = -1 // 订单状态：已关闭
-	OrderUnPaid OrderStatus = 0  // 订单状态：未支付
-	OrderPaid   OrderStatus = 1  // 订单状态：已支付
+	OrderClosed     OrderStatus = -1 // 订单状态：已关闭
+	OrderWaitPay    OrderStatus = 0  // 订单状态：未支付
+	OrderPaying     OrderStatus = 1  // 订单状态：支付中
+	OrderPaySuccess OrderStatus = 2  // 订单状态：支付成功
 )

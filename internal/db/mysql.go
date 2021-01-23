@@ -28,8 +28,8 @@ func open(c *conf.DB) (db *sql.DB, err error) {
 	if err = db.Ping(); err != nil {
 		return
 	}
-	db.SetMaxIdleConns(100)
-	db.SetMaxOpenConns(300)
+	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(3000)
 	return
 }

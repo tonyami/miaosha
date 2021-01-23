@@ -39,7 +39,7 @@ func (s *Service) Cancel(orderId string, userId int64) (err error) {
 		err = code.Denied
 		return
 	}
-	if o.Status != conf.OrderUnPaid {
+	if o.Status != conf.OrderWaitPay {
 		err = code.OrderCannotClose
 		return
 	}
@@ -62,7 +62,7 @@ func (s *Service) Get(orderId string, userId int64) (order *model.OrderDTO, err 
 	if order.UserId != userId {
 		err = code.Denied
 	}
-	if order.Status == conf.OrderUnPaid {
+	if order.Status == conf.OrderWaitPay {
 		if time.Now().Unix()-order.CreateTime.Unix() < conf.OrderExpire {
 			order.Duration = order.CreateTime.Unix() + conf.OrderExpire - time.Now().Unix()
 		}
@@ -107,7 +107,7 @@ func (s *Service) Miaosha(userId int64, goodsId int64) (orderId string, err erro
 		UserId:     userId,
 		GoodsId:    g.Id,
 		CreateTime: time.Now(),
-		Status:     conf.OrderUnPaid,
+		Status:     conf.OrderWaitPay,
 	}
 	if err = s.dao.Miaosha(o); err != nil {
 		err = code.MiaoshaFailed
