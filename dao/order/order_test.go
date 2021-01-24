@@ -28,7 +28,7 @@ func TestDao_GetOvertimeList(t *testing.T) {
 func TestDao_Close(t *testing.T) {
 	order := model.Order{
 		Id:      "2101082621259341",
-		Status:  conf.OrderWaitPay,
+		Status:  conf.OrderStatusClosed,
 		GoodsId: 4,
 	}
 	if err := d.Close(&order); err != nil {
@@ -66,7 +66,7 @@ func TestDao_Miaosha(t *testing.T) {
 		UserId:     1,
 		GoodsId:    5,
 		CreateTime: time.Now(),
-		Status:     conf.OrderUnPaid,
+		Status:     conf.OrderStatusUnfinished,
 	}
 	if err := d.Miaosha(order); err != nil {
 		t.Fatal(err)

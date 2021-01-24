@@ -40,7 +40,7 @@ func (d *Dao) GetOvertimeList(expire int) (ids []string, err error) {
 	}
 	defer stmt.Close()
 	ids = make([]string, 0)
-	if rows, err = stmt.Query(conf.OrderWaitPay, expire); err != nil {
+	if rows, err = stmt.Query(conf.OrderStatusUnfinished, expire); err != nil {
 		return
 	}
 	for rows.Next() {
@@ -64,7 +64,7 @@ func (d *Dao) Close(order *model.Order) (err error) {
 	}
 	defer tx.Rollback()
 	// 关闭订单
-	if rs1, err = d.db.Exec(_closeSql, conf.OrderClosed, order.Id, order.Status); err != nil {
+	if rs1, err = d.db.Exec(_closeSql, conf.OrderStatusClosed, order.Id, order.Status); err != nil {
 		return
 	}
 	if aff1, err = rs1.RowsAffected(); err != nil {
@@ -157,7 +157,7 @@ func (d *Dao) Count(userId, goodsId int64) (count int64, err error) {
 	if stmt, err = d.db.Prepare(_countSql); err != nil {
 		return
 	}
-	if err = stmt.QueryRow(userId, goodsId, conf.OrderClosed).Scan(&count); err != nil {
+	if err = stmt.QueryRow(userId, goodsId, conf.OrderStatusClosed).Scan(&count); err != nil {
 		return
 	}
 	return

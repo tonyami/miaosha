@@ -27,8 +27,7 @@ const (
 type OrderStatus int8
 
 const (
-	OrderClosed     OrderStatus = -1 // 订单状态：已关闭
-	OrderWaitPay    OrderStatus = 0  // 订单状态：未支付
-	OrderPaying     OrderStatus = 1  // 订单状态：支付中
-	OrderPaySuccess OrderStatus = 2  // 订单状态：支付成功
+	OrderStatusClosed     OrderStatus = -1 // 订单状态：已关闭
+	OrderStatusUnfinished OrderStatus = 0  // 订单状态：未完成
+	OrderStatusFinished   OrderStatus = 1  // 订单状态：已完成
 )
