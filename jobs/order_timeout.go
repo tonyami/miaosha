@@ -41,6 +41,7 @@ func (*OrderTimeoutJob) Add(orderId int64) {
 
 func (*OrderTimeoutJob) Start() {
 	for {
+		time.Sleep(500 * time.Millisecond)
 		list, err := rdb.ZRangeByScore(order_timeout_delay_queue, "0", strconv.FormatInt(time.Now().Unix(), 10), 0, 0)
 		if err != nil {
 			continue
