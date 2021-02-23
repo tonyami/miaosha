@@ -23,6 +23,7 @@ var (
 	_getByIdAndUserIdSql = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? and `user_id` = ? limit 1"
 	_getListSql          = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `user_id` = ?"
 	_closeSql            = "update `miaosha_order` set `status` = ? where `id` = ? and `status` = ?"
+	_countByStatusSql    = "select ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'unfinished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'finished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'closed' from `miaosha_order` where `user_id` = ?"
 )
 
 func (dao *Dao) CountPurchased(userId, goodsId int64) (count int64, err error) {
@@ -107,6 +108,18 @@ func (dao *Dao) Close(id int64) (err error) {
 	}
 	if _, err = rs.RowsAffected(); err != nil {
 		log.Printf("rs.RowsAffected() failed, err: %v", err)
+	}
+	return
+}
+
+func (dao *Dao) CountByStatus(userId int64) (count *OrderCount, err error) {
+	count = new(OrderCount)
+	if err = dao.db.QueryRow(_countByStatusSql, service.Unpaid, service.Paid, service.Closed, userId).Scan(&count.Unfinished, &count.Finished, &count.Closed); err != nil {
+		if err == sql.ErrNoRows {
+			err = nil
+		} else {
+			log.Printf("stmt.QueryRow(_countByStatusSql, %d).Scan() failed, err: %v", userId, err)
+		}
 	}
 	return
 }

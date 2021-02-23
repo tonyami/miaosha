@@ -177,3 +177,15 @@ func cancel(dto *service.OrderDTO) (err error) {
 	}
 	return
 }
+
+func (s *orderService) CountByStatus(userId int64) (count *service.OrderCountDTO, err error) {
+	var orderCount *OrderCount
+	conn := db.Get()
+	orderDao := NewDao(conn)
+	if orderCount, err = orderDao.CountByStatus(userId); err != nil {
+		err = errors.New("db error")
+		return
+	}
+	count = orderCount.toDTO()
+	return
+}

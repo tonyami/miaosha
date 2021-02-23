@@ -66,7 +66,15 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
+	count, err := orderService.CountByStatus(user.Id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"user": user,
+		"user":  user,
+		"count": count,
 	})
 }

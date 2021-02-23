@@ -17,6 +17,7 @@ type OrderService interface {
 	Create(int64, int64) (int64, error)                   // 创建订单
 	ManualCancel(int64, int64) error                      // 手动取消订单
 	AutoCancel(int64) error                               // 自动取消订单
+	CountByStatus(int64) (*OrderCountDTO, error)
 }
 
 type OrderDTO struct {
@@ -29,4 +30,10 @@ type OrderDTO struct {
 	Duration   int64       `json:"duration,omitempty"`
 	CreateTime time.Time   `json:"createTime"`
 	UpdateTime time.Time   `json:"updateTime"`
+}
+
+type OrderCountDTO struct {
+	Unfinished int64 `json:"unfinished"`
+	Finished   int64 `json:"finished"`
+	Closed     int64 `json:"closed"`
 }

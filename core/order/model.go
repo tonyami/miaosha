@@ -35,3 +35,17 @@ func (o *Order) toDTO() *service.OrderDTO {
 	}
 	return dto
 }
+
+type OrderCount struct {
+	Unfinished int64
+	Finished   int64
+	Closed     int64
+}
+
+func (o *OrderCount) toDTO() *service.OrderCountDTO {
+	return &service.OrderCountDTO{
+		Unfinished: o.Unfinished,
+		Finished:   o.Finished,
+		Closed:     o.Closed,
+	}
+}
