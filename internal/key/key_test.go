@@ -5,7 +5,13 @@ import (
 )
 
 func TestToken(t *testing.T) {
-	if token := Token(); len(token) != 64 {
-		t.Fatal()
-	}
+	t.Log(Token())
+	t.Log(Token())
+	t.Log(Token())
+}
+
+func TestSmsCode(t *testing.T) {
+	t.Log(SmsCode())
+	t.Log(SmsCode())
+	t.Log(SmsCode())
 }

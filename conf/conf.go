@@ -16,6 +16,9 @@ type DB struct {
 	User     string
 	Password string
 	Name     string
+	Idles    int
+	Opens    int
+	LifeTime int
 }
 
 type Redis struct {
@@ -34,6 +37,9 @@ func initEnv() (c *Config) {
 		User:     os.Getenv("MIAOSHA_DB_USER"),
 		Password: os.Getenv("MIAOSHA_DB_PASSWORD"),
 		Name:     os.Getenv("MIAOSHA_DB_NAME"),
+		Idles:    2,
+		Opens:    5,
+		LifeTime: 2,
 	}
 	Conf.Redis = &Redis{
 		Host:     os.Getenv("MIAOSHA_REDIS_HOST"),

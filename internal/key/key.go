@@ -12,8 +12,8 @@ const (
 	number = "1234567890"
 )
 
-func OrderId() string {
-	return time.Now().Format("060102") + create(number, 10)
+func FullTime() string {
+	return time.Now().Format("20060102150405")
 }
 
 func Token() string {
