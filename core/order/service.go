@@ -6,6 +6,7 @@ import (
 	"log"
 	"miaosha/core/goods"
 	"miaosha/internal/db"
+	"miaosha/jobs"
 	"miaosha/service"
 	"sync"
 )
@@ -41,10 +42,25 @@ func (s *orderService) GetList(userId int64, page int, status string) (orders []
 	return
 }
 
-func (s *orderService) Get(id, userId int64) (order *service.OrderDTO, err error) {
+func (s *orderService) GetById(id int64) (order *service.OrderDTO, err error) {
 	dao := NewDao(db.Get())
 	var o *Order
-	if o, err = dao.Get(id, userId); err != nil {
+	if o, err = dao.GetById(id); err != nil {
+		err = errors.New("db error")
+		return
+	}
+	if o.Id == 0 {
+		err = errors.New("goods not found")
+		return
+	}
+	order = o.toDTO()
+	return
+}
+
+func (s *orderService) GetByIdAndUserId(id, userId int64) (order *service.OrderDTO, err error) {
+	dao := NewDao(db.Get())
+	var o *Order
+	if o, err = dao.GetByIdAndUserId(id, userId); err != nil {
 		err = errors.New("db error")
 		return
 	}
@@ -114,14 +130,30 @@ func (s *orderService) Create(userId, goodsId int64) (orderId int64, err error) 
 		err = errors.New("秒杀失败")
 		return
 	}
+	// 5、放入订单超时延时队列
+	jobs.GetOrderTimeoutJob().Add(orderId)
 	return
 }
 
-func (s *orderService) Cancel(id, userId int64) (err error) {
+func (s *orderService) ManualCancel(id, userId int64) (err error) {
 	var dto *service.OrderDTO
-	if dto, err = s.Get(id, userId); err != nil {
+	if dto, err = s.GetByIdAndUserId(id, userId); err != nil {
 		return
 	}
+	err = cancel(dto)
+	return
+}
+
+func (s *orderService) AutoCancel(id int64) (err error) {
+	var dto *service.OrderDTO
+	if dto, err = s.GetById(id); err != nil {
+		return
+	}
+	err = cancel(dto)
+	return
+}
+
+func cancel(dto *service.OrderDTO) (err error) {
 	if dto.Status != service.Unpaid {
 		err = errors.New("订单无法取消")
 		return

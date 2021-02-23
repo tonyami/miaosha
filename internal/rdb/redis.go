@@ -66,3 +66,42 @@ func Expire(key string, expire int) (err error) {
 	}
 	return
 }
+
+func ZAdd(key string, score float64, member interface{}) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	if err = redisCli.ZAdd(ctx, key, &redis.Z{
+		Score:  score,
+		Member: member,
+	}).Err(); err != nil {
+		log.Printf("redisCli.ZAdd(%s, %f, %v) failed, err: %v", key, score, member, err)
+		cancel()
+		return
+	}
+	return
+}
+
+func ZRem(key string, member interface{}) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	if err = redisCli.ZRem(ctx, key, member).Err(); err != nil {
+		log.Printf("redisCli.ZRem(%s, %v) failed, err: %v", key, member, err)
+		cancel()
+		return
+	}
+	return
+}
+
+func ZRangeByScore(key, min, max string, offset, count int64) (list []string, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	z := &redis.ZRangeBy{
+		Min:    min,
+		Max:    max,
+		Offset: offset,
+		Count:  count,
+	}
+	if list, err = redisCli.ZRangeByScore(ctx, key, z).Result(); err != nil {
+		log.Printf("redisCli.ZRangeByScore(%s, %v) failed, err: %v", key, z, err)
+		cancel()
+		return
+	}
+	return
+}

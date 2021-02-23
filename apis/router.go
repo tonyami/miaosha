@@ -29,7 +29,7 @@ func initRouter(router *gin.Engine) {
 	router.Use(Auth())
 	router.GET("/user", GetUserInfo)
 	router.GET("/order", GetOrder)
-	router.GET("/orders", GetOrderList)
+	router.GET("/order/list", GetOrderList)
 	router.POST("/order", CreateOrder)
 	router.POST("/order/cancel", CancelOrder)
 }

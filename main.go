@@ -6,6 +6,7 @@ import (
 	"miaosha/conf"
 	"miaosha/internal/db"
 	"miaosha/internal/rdb"
+	"miaosha/jobs"
 )
 
 func main() {
@@ -16,6 +17,7 @@ func main() {
 	if err := rdb.Init(conf.Conf.Redis); err != nil {
 		log.Fatalf("rdb init failed, err:%v", err)
 	}
+	jobs.Init()
 	if err := apis.Init(); err != nil {
 		log.Fatalf("api init failed, err:%v", err)
 	}

@@ -30,7 +30,7 @@ func GetOrder(c *gin.Context) {
 		return
 	}
 	uid, _ := c.Get("uid")
-	order, err := orderService.Get(id, uid.(int64))
+	order, err := orderService.GetByIdAndUserId(id, uid.(int64))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": err.Error(),
@@ -68,7 +68,7 @@ func CancelOrder(c *gin.Context) {
 		return
 	}
 	uid, _ := c.Get("uid")
-	err := orderService.Cancel(r.Id, uid.(int64))
+	err := orderService.ManualCancel(r.Id, uid.(int64))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": err.Error(),

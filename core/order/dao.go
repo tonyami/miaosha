@@ -17,11 +17,12 @@ func NewDao(db *sql.DB) *Dao {
 }
 
 var (
-	_countPurchasedSql = "select count(*) from `miaosha_order` where `user_id` = ? and `goods_id` = ? and `status` != ?"
-	_insertSql         = "insert into `miaosha_order`(`user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`) values(?, ?, ?, ?, ?)"
-	_getSql            = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? and `user_id` = ? limit 1"
-	_getListSql        = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `user_id` = ?"
-	_closeSql          = "update `miaosha_order` set `status` = ? where `id` = ? and `status` = ?"
+	_countPurchasedSql   = "select count(*) from `miaosha_order` where `user_id` = ? and `goods_id` = ? and `status` != ?"
+	_insertSql           = "insert into `miaosha_order`(`user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`) values(?, ?, ?, ?, ?)"
+	_getByIdSql          = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? limit 1"
+	_getByIdAndUserIdSql = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? and `user_id` = ? limit 1"
+	_getListSql          = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `user_id` = ?"
+	_closeSql            = "update `miaosha_order` set `status` = ? where `id` = ? and `status` = ?"
 )
 
 func (dao *Dao) CountPurchased(userId, goodsId int64) (count int64, err error) {
@@ -44,13 +45,25 @@ func (dao *Dao) Insert(order *Order) (orderId int64, err error) {
 	return
 }
 
-func (dao *Dao) Get(id, userId int64) (order *Order, err error) {
+func (dao *Dao) GetById(id int64) (order *Order, err error) {
 	order = &Order{}
-	if err = dao.db.QueryRow(_getSql, id, userId).Scan(&order.Id, &order.UserId, &order.GoodsId, &order.GoodsName, &order.GoodsImg, &order.GoodsPrice, &order.Status, &order.CreateTime, &order.UpdateTime); err != nil {
+	if err = dao.db.QueryRow(_getByIdSql, id).Scan(&order.Id, &order.UserId, &order.GoodsId, &order.GoodsName, &order.GoodsImg, &order.GoodsPrice, &order.Status, &order.CreateTime, &order.UpdateTime); err != nil {
 		if err == sql.ErrNoRows {
 			err = nil
 		} else {
-			log.Printf("stmt.QueryRow(%d).Scan() failed, err: %v", id, err)
+			log.Printf("stmt.QueryRow(_getByIdSql, %d).Scan() failed, err: %v", id, err)
+		}
+	}
+	return
+}
+
+func (dao *Dao) GetByIdAndUserId(id, userId int64) (order *Order, err error) {
+	order = &Order{}
+	if err = dao.db.QueryRow(_getByIdAndUserIdSql, id, userId).Scan(&order.Id, &order.UserId, &order.GoodsId, &order.GoodsName, &order.GoodsImg, &order.GoodsPrice, &order.Status, &order.CreateTime, &order.UpdateTime); err != nil {
+		if err == sql.ErrNoRows {
+			err = nil
+		} else {
+			log.Printf("stmt.QueryRow(_getByIdAndUserIdSql, %d, %d).Scan() failed, err: %v", id, userId, err)
 		}
 	}
 	return
