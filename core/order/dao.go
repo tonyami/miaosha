@@ -23,7 +23,7 @@ var (
 	_getByIdSql          = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? limit 1"
 	_getByIdAndUserIdSql = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? and `user_id` = ? limit 1"
 	_closeSql            = "update `miaosha_order` set `status` = ? where `id` = ? and `status` = ?"
-	_countByStatusSql    = "select ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'unfinished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'finished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'closed' from `miaosha_order` where `user_id` = ?"
+	_countByStatusSql    = "select ifnull(sum(case when `status` = ? or `status` = ? then 1 else 0 end), 0) 'unfinished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'finished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'closed' from `miaosha_order` where `user_id` = ?"
 )
 
 func (dao *Dao) CountPurchased(userId, goodsId int64) (count int64, err error) {
@@ -74,11 +74,11 @@ func (dao *Dao) GetList(userId int64, page, size int, status service.OrderListSt
 	var rows *sql.Rows
 	sqlStr := "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `user_id` = ?"
 	if status == service.Unfinished {
-		sqlStr += fmt.Sprintf(" `status` = %d or `status` = %d", service.Unpaid, service.Paying)
+		sqlStr += fmt.Sprintf(" and (`status` = %d or `status` = %d)", service.Unpaid, service.Paying)
 	} else if status == service.Finished {
-		sqlStr += fmt.Sprintf(" `status` = %d", service.Paid)
+		sqlStr += fmt.Sprintf(" and `status` = %d", service.Paid)
 	} else if status == service.Closed2 {
-		sqlStr += fmt.Sprintf(" `status` = %d", service.Closed)
+		sqlStr += fmt.Sprintf(" and `status` = %d", service.Closed)
 	}
 	sqlStr += " order by id desc limit ?, ?"
 	if rows, err = dao.db.Query(sqlStr, userId, (page-1)*size, size); err != nil {
@@ -112,7 +112,7 @@ func (dao *Dao) Close(id int64) (err error) {
 
 func (dao *Dao) CountData(userId int64) (count *OrderCount, err error) {
 	count = new(OrderCount)
-	if err = dao.db.QueryRow(_countByStatusSql, service.Unpaid, service.Paid, service.Closed, userId).Scan(&count.Unfinished, &count.Finished, &count.Closed); err != nil {
+	if err = dao.db.QueryRow(_countByStatusSql, service.Unpaid, service.Paying, service.Paid, service.Closed, userId).Scan(&count.Unfinished, &count.Finished, &count.Closed); err != nil {
 		if err == sql.ErrNoRows {
 			err = nil
 		} else {
