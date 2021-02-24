@@ -1,9 +1,5 @@
 package service
 
-import (
-	"time"
-)
-
 var IOrderService OrderService
 
 func GetOrderService() OrderService {
@@ -27,10 +23,10 @@ type OrderDTO struct {
 	GoodsImg   string      `json:"goodsImg"`
 	GoodsPrice int64       `json:"goodsPrice"`
 	Status     OrderStatus `json:"status"`
-	Duration   int64       `json:"duration,omitempty"`
-	Timeout    int64       `json:"timeout,omitempty"`
-	CreateTime time.Time   `json:"createTime"`
-	UpdateTime time.Time   `json:"updateTime"`
+	Duration   int64       `json:"duration"`
+	Timeout    int64       `json:"timeout"`
+	CreateTime string      `json:"createTime"`
+	UpdateTime string      `json:"updateTime"`
 }
 
 type OrderCountDTO struct {
