@@ -27,11 +27,12 @@ func (o *Order) toDTO() *service.OrderDTO {
 		GoodsPrice: o.GoodsPrice,
 		Status:     service.OrderStatus(o.Status),
 		Duration:   0,
+		Timeout:    service.OrderTimeout,
 		CreateTime: o.CreateTime,
 		UpdateTime: o.UpdateTime,
 	}
 	if dto.Status == service.Unpaid {
-		dto.Duration = dto.CreateTime.Unix() + service.OrderExpire - time.Now().Unix()
+		dto.Duration = dto.CreateTime.Unix() + service.OrderTimeout - time.Now().Unix()
 	}
 	return dto
 }

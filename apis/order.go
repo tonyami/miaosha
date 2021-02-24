@@ -2,6 +2,7 @@ package apis
 
 import (
 	"github.com/gin-gonic/gin"
+	"miaosha/service"
 	"net/http"
 	"strconv"
 )
@@ -11,7 +12,11 @@ func GetOrderList(c *gin.Context) {
 	if err != nil {
 		page = 1
 	}
-	status := c.Query("status")
+	status, b := service.OrderListStatusContains(c.Query("status"))
+	if !b {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 	uid, _ := c.Get("uid")
 	orders, err := orderService.GetList(uid.(int64), page, status)
 	if err != nil {

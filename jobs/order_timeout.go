@@ -10,7 +10,6 @@ import (
 )
 
 const order_timeout_delay_queue = "order_timeout_delay_queue"
-const order_timeout_time = 1800
 
 var orderTimeoutJobInstance *OrderTimeoutJob
 
@@ -31,7 +30,7 @@ func GetOrderTimeoutJob() *OrderTimeoutJob {
 }
 
 func (*OrderTimeoutJob) Add(orderId int64) {
-	if err := rdb.ZAdd(order_timeout_delay_queue, float64(time.Now().Unix()+order_timeout_time), orderId); err != nil {
+	if err := rdb.ZAdd(order_timeout_delay_queue, float64(time.Now().Unix()+service.OrderTimeout), orderId); err != nil {
 		log.Printf("订单【%d】进入延时队列失败, err: %v", orderId, err)
 	} else {
 		log.Printf("订单【%d】进入延时队列", orderId)

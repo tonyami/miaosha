@@ -28,7 +28,7 @@ type orderService struct {
 	goodsService service.GoodsService
 }
 
-func (s *orderService) GetList(userId int64, page int, status string) (orders []*service.OrderDTO, err error) {
+func (s *orderService) GetList(userId int64, page int, status service.OrderListStatus) (orders []*service.OrderDTO, err error) {
 	dao := NewDao(db.Get())
 	var list []*Order
 	if list, err = dao.GetList(userId, page, service.PageSize, status); err != nil {

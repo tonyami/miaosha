@@ -2,6 +2,7 @@ package order
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"miaosha/service"
 )
@@ -21,7 +22,6 @@ var (
 	_insertSql           = "insert into `miaosha_order`(`user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`) values(?, ?, ?, ?, ?)"
 	_getByIdSql          = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? limit 1"
 	_getByIdAndUserIdSql = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `id` = ? and `user_id` = ? limit 1"
-	_getListSql          = "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `user_id` = ?"
 	_closeSql            = "update `miaosha_order` set `status` = ? where `id` = ? and `status` = ?"
 	_countByStatusSql    = "select ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'unfinished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'finished', ifnull(sum(case when `status` = ? then 1 else 0 end), 0) 'closed' from `miaosha_order` where `user_id` = ?"
 )
@@ -70,22 +70,20 @@ func (dao *Dao) GetByIdAndUserId(id, userId int64) (order *Order, err error) {
 	return
 }
 
-func (dao *Dao) GetList(userId int64, page, size int, status string) (list []*Order, err error) {
+func (dao *Dao) GetList(userId int64, page, size int, status service.OrderListStatus) (list []*Order, err error) {
 	var rows *sql.Rows
-	_sql := _getListSql
-	if len(status) > 0 {
-		_sql += " and `status` = ?"
-		_sql += " order by id desc limit ?, ?"
-		if rows, err = dao.db.Query(_sql, userId, status, (page-1)*size, size); err != nil {
-			log.Printf("dao.db.Query(_getListSql, %d, %s, %d, %d) failed, err: %v", userId, status, (page-1)*size, size, err)
-			return
-		}
-	} else {
-		_sql += " order by id desc limit ?, ?"
-		if rows, err = dao.db.Query(_sql, userId, (page-1)*size, size); err != nil {
-			log.Printf("dao.db.Query(_getListSql, %d, %d, %d) failed, err: %v", userId, (page-1)*size, size, err)
-			return
-		}
+	sqlStr := "select `id`, `user_id`, `goods_id`, `goods_name`, `goods_img`, `goods_price`, `status`, `create_time`, `update_time` from `miaosha_order` where `user_id` = ?"
+	if status == service.Unfinished {
+		sqlStr += fmt.Sprintf(" `status` = %d or `status` = %d", service.Unpaid, service.Paying)
+	} else if status == service.Finished {
+		sqlStr += fmt.Sprintf(" `status` = %d", service.Paid)
+	} else if status == service.Closed2 {
+		sqlStr += fmt.Sprintf(" `status` = %d", service.Closed)
+	}
+	sqlStr += " order by id desc limit ?, ?"
+	if rows, err = dao.db.Query(sqlStr, userId, (page-1)*size, size); err != nil {
+		log.Printf("dao.db.Query(_getListSql, %d, %d, %d) failed, err: %v", userId, (page-1)*size, size, err)
+		return
 	}
 	defer rows.Close()
 	list = []*Order{}

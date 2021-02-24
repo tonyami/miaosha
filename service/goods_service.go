@@ -30,7 +30,7 @@ func (dto *GoodsDTO) Check() (err error) {
 		err = errors.New("秒杀还未开始")
 	} else if dto.Status == SoldOut {
 		err = errors.New("商品已售罄")
-	} else if dto.Status == Finished {
+	} else if dto.Status == Ended {
 		err = errors.New("秒杀已结束")
 	}
 	return

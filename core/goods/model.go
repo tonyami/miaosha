@@ -37,7 +37,7 @@ func (goods *Goods) toDTO() *service.GoodsDTO {
 			dto.Status = service.SoldOut
 		}
 	} else {
-		dto.Status = service.Finished
+		dto.Status = service.Ended
 	}
 	return dto
 }
