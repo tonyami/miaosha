@@ -39,6 +39,15 @@ func (*OrderTimeoutJob) Add(orderId int64) {
 	return
 }
 
+func (*OrderTimeoutJob) Remove(orderId int64) {
+	if err := rdb.ZRem(order_timeout_delay_queue, orderId); err != nil {
+		log.Printf("订单【%d】移除延时队列失败, err: %v", orderId, err)
+	} else {
+		log.Printf("订单【%d】移除延时队列", orderId)
+	}
+	return
+}
+
 func (*OrderTimeoutJob) Start() {
 	for {
 		time.Sleep(500 * time.Millisecond)
@@ -48,12 +57,8 @@ func (*OrderTimeoutJob) Start() {
 		}
 		if len(list) > 0 {
 			orderId, _ := strconv.ParseInt(list[0], 10, 64)
-			if err = service.GetOrderService().AutoCancel(orderId); err != nil {
+			if err = service.GetOrderService().SysCancel(orderId); err != nil {
 				log.Printf("订单【%d】取消失败, err: %v", orderId, err)
-				continue
-			}
-			if err = rdb.ZRem(order_timeout_delay_queue, orderId); err != nil {
-				log.Printf("订单【%d】移除延时队列失败, err: %v", orderId, err)
 				continue
 			}
 			log.Printf("订单【%d】已关闭", orderId)

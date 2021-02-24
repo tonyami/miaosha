@@ -144,7 +144,7 @@ func (s *orderService) ManualCancel(id, userId int64) (err error) {
 	return
 }
 
-func (s *orderService) AutoCancel(id int64) (err error) {
+func (s *orderService) SysCancel(id int64) (err error) {
 	var dto *service.OrderDTO
 	if dto, err = s.GetById(id); err != nil {
 		return
@@ -175,14 +175,16 @@ func cancel(dto *service.OrderDTO) (err error) {
 		err = errors.New("订单取消失败")
 		return
 	}
+	// 移除订单超时队列
+	jobs.GetOrderTimeoutJob().Remove(dto.Id)
 	return
 }
 
-func (s *orderService) CountByStatus(userId int64) (count *service.OrderCountDTO, err error) {
+func (s *orderService) CountData(userId int64) (count *service.OrderCountDTO, err error) {
 	var orderCount *OrderCount
 	conn := db.Get()
 	orderDao := NewDao(conn)
-	if orderCount, err = orderDao.CountByStatus(userId); err != nil {
+	if orderCount, err = orderDao.CountData(userId); err != nil {
 		err = errors.New("db error")
 		return
 	}

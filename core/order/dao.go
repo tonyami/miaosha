@@ -112,7 +112,7 @@ func (dao *Dao) Close(id int64) (err error) {
 	return
 }
 
-func (dao *Dao) CountByStatus(userId int64) (count *OrderCount, err error) {
+func (dao *Dao) CountData(userId int64) (count *OrderCount, err error) {
 	count = new(OrderCount)
 	if err = dao.db.QueryRow(_countByStatusSql, service.Unpaid, service.Paid, service.Closed, userId).Scan(&count.Unfinished, &count.Finished, &count.Closed); err != nil {
 		if err == sql.ErrNoRows {
