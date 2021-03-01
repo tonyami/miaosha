@@ -7,8 +7,8 @@ import (
 )
 
 func init() {
-	conf.Init()
-	if err := Init(conf.Conf.DB); err != nil {
+	conf.Init("")
+	if err := Init(); err != nil {
 		panic(err)
 	}
 }

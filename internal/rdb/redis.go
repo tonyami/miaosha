@@ -11,7 +11,8 @@ import (
 
 var redisCli *redis.Client
 
-func Init(c *conf.Redis) (err error) {
+func Init() (err error) {
+	c := conf.Conf.Redis
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	redisCli = redis.NewClient(&redis.Options{
 		Addr:     c.Host,

@@ -13,10 +13,10 @@ func main() {
 	if err := conf.Init("./conf.ini"); err != nil {
 		log.Fatalf("conf init failed, err:%v", err)
 	}
-	if err := db.Init(conf.Conf.DB); err != nil {
+	if err := db.Init(); err != nil {
 		log.Fatalf("db init failed, err:%v", err)
 	}
-	if err := rdb.Init(conf.Conf.Redis); err != nil {
+	if err := rdb.Init(); err != nil {
 		log.Fatalf("rdb init failed, err:%v", err)
 	}
 	jobs.Init()

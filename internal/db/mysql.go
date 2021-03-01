@@ -11,7 +11,8 @@ import (
 
 var db *sql.DB
 
-func Init(c *conf.DB) (err error) {
+func Init() (err error) {
+	c := conf.Conf.DB
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true&loc=Local", c.User, c.Password, c.Host, c.Name)
 	if db, err = sql.Open("mysql", dsn); err != nil {
 		return
