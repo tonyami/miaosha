@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"log"
+	"miaosha/conf"
 	"miaosha/internal/rdb"
 	"miaosha/service"
 	"strconv"
@@ -30,7 +31,7 @@ func GetOrderTimeoutJob() *OrderTimeoutJob {
 }
 
 func (*OrderTimeoutJob) Add(orderId int64) {
-	if err := rdb.ZAdd(order_timeout_delay_queue, float64(time.Now().Unix()+service.OrderTimeout), orderId); err != nil {
+	if err := rdb.ZAdd(order_timeout_delay_queue, float64(time.Now().Unix()+conf.Conf.Order.Expire), orderId); err != nil {
 		log.Printf("订单【%d】进入延时队列失败, err: %v", orderId, err)
 	} else {
 		log.Printf("订单【%d】进入延时队列", orderId)

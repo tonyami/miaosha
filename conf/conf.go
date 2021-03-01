@@ -10,6 +10,7 @@ var Conf = new(Config)
 type Config struct {
 	DB    *DB    `ini:"db"`
 	Redis *Redis `ini:"redis"`
+	Order *Order `ini:"order"`
 }
 
 type DB struct {
@@ -25,6 +26,10 @@ type DB struct {
 type Redis struct {
 	Host     string `ini:"host"`
 	Password string `ini:"password"`
+}
+
+type Order struct {
+	Expire int64 `ini:"expire"`
 }
 
 func Init(file string) (err error) {
@@ -49,6 +54,9 @@ func initEnv() (c *Config) {
 	Conf.Redis = &Redis{
 		Host:     os.Getenv("MIAOSHA_REDIS_HOST"),
 		Password: os.Getenv("MIAOSHA_REDIS_PASSWORD"),
+	}
+	Conf.Order = &Order{
+		Expire: 1800,
 	}
 	return
 }

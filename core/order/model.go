@@ -1,6 +1,7 @@
 package order
 
 import (
+	"miaosha/conf"
 	"miaosha/service"
 	"time"
 )
@@ -19,6 +20,7 @@ type Order struct {
 }
 
 func (o *Order) toDTO() *service.OrderDTO {
+	c := conf.Conf.Order
 	dto := &service.OrderDTO{
 		Id:         o.Id,
 		GoodsId:    o.GoodsId,
@@ -27,12 +29,12 @@ func (o *Order) toDTO() *service.OrderDTO {
 		GoodsPrice: o.GoodsPrice,
 		Status:     service.OrderStatus(o.Status),
 		Duration:   0,
-		Timeout:    service.OrderTimeout,
+		Timeout:    c.Expire,
 		CreateTime: o.CreateTime.Format("2006-01-02 15:04:05"),
 		UpdateTime: o.UpdateTime.Format("2006-01-02 15:04:05"),
 	}
 	if dto.Status == service.Unpaid {
-		dto.Duration = o.CreateTime.Unix() + service.OrderTimeout - time.Now().Unix()
+		dto.Duration = o.CreateTime.Unix() + c.Expire - time.Now().Unix()
 	}
 	return dto
 }

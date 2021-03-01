@@ -29,6 +29,5 @@ func OrderListStatusContains(status string) (OrderListStatus, bool) {
 }
 
 const (
-	OrderTimeout = 60 // 订单有效期
-	PageSize     = 10
+	PageSize = 10
 )
