@@ -1,37 +1,42 @@
 package conf
 
 import (
+	"gopkg.in/ini.v1"
 	"os"
 )
 
-var Conf *Config
+var Conf = new(Config)
 
 type Config struct {
-	DB    *DB
-	Redis *Redis
+	DB    *DB    `ini:"db"`
+	Redis *Redis `ini:"redis"`
 }
 
 type DB struct {
-	Host     string
-	User     string
-	Password string
-	Name     string
-	Idles    int
-	Opens    int
-	LifeTime int
+	Host     string `ini:"host"`
+	User     string `ini:"user"`
+	Password string `ini:"password"`
+	Name     string `ini:"name"`
+	Idles    int    `ini:"idles"`
+	Opens    int    `ini:"opens"`
+	LifeTime int    `ini:"lifetime"`
 }
 
 type Redis struct {
-	Host     string
-	Password string
+	Host     string `ini:"host"`
+	Password string `ini:"password"`
 }
 
-func Init() {
-	initEnv()
+func Init(file string) (err error) {
+	if file == "" {
+		initEnv()
+	} else {
+		err = initFile(file)
+	}
+	return
 }
 
 func initEnv() (c *Config) {
-	Conf = &Config{}
 	Conf.DB = &DB{
 		Host:     os.Getenv("MIAOSHA_DB_HOST"),
 		User:     os.Getenv("MIAOSHA_DB_USER"),
@@ -46,4 +51,8 @@ func initEnv() (c *Config) {
 		Password: os.Getenv("MIAOSHA_REDIS_PASSWORD"),
 	}
 	return
+}
+
+func initFile(file string) error {
+	return ini.MapTo(&Conf, file)
 }

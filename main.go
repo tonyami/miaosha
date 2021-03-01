@@ -10,7 +10,9 @@ import (
 )
 
 func main() {
-	conf.Init()
+	if err := conf.Init("./conf.ini"); err != nil {
+		log.Fatalf("conf init failed, err:%v", err)
+	}
 	if err := db.Init(conf.Conf.DB); err != nil {
 		log.Fatalf("db init failed, err:%v", err)
 	}
