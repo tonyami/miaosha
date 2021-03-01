@@ -14,7 +14,7 @@ func init() {
 }
 
 func TestTx(t *testing.T) {
-	if err := Tx(Conn(), func(conn *sql.DB) (err error) {
+	if err := Tx(Get(), func(conn *sql.DB) (err error) {
 		if _, err = conn.Exec("update `tx_user` set `money` = `money` - ? where `id` = ? and `money` >= 0", 100, 1); err != nil {
 			return
 		}
