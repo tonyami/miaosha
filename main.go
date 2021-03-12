@@ -2,11 +2,11 @@ package main
 
 import (
 	"log"
-	"miaosha/apis"
 	"miaosha/conf"
-	"miaosha/internal/db"
-	"miaosha/internal/rdb"
+	"miaosha/infra/db"
+	"miaosha/infra/rdb"
 	"miaosha/jobs"
+	"miaosha/router"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("rdb init failed, err:%v", err)
 	}
 	jobs.Init()
-	if err := apis.Init(); err != nil {
-		log.Fatalf("api init failed, err:%v", err)
+	if err := router.Init(); err != nil {
+		log.Fatalf("router init failed, err:%v", err)
 	}
 }
