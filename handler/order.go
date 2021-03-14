@@ -83,7 +83,7 @@ func CreateOrder(c *gin.Context) {
 	}
 	// 3、校验是否重复秒杀
 	uid, _ := c.Get("uid")
-	count, err := repository.CountRepeatableOrder(uid.(int64), goods.Id)
+	count, err := repository.GetOrderIdByUidAndGid(uid.(int64), goods.Id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": SystemErr,
@@ -96,14 +96,15 @@ func CreateOrder(c *gin.Context) {
 		})
 		return
 	}
-	// 4、减库存、创建订单
-	order := model.NewOrder(uid.(int64), goods)
+	// 4、减库存、创建订单、加入延迟队列
+	order := model.NewOrderInfo(uid.(int64), goods)
 	if err = repository.CreateOrder(order); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": "秒杀失败",
 		})
 		return
 	}
+	// 5、加入延迟队列
 	jobs.GetOrderTimeoutJob().Add(order.OrderId)
 	c.JSON(http.StatusOK, gin.H{
 		"orderId": order.OrderId,
@@ -143,7 +144,7 @@ func CancelOrder(c *gin.Context) {
 		})
 		return
 	}
-	if err = repository.CloseOrder(order.OrderId, order.GoodsId); err != nil {
+	if err = repository.CloseOrder(order); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": "订单取消失败",
 		})

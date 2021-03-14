@@ -2,20 +2,12 @@ package repository
 
 import (
 	"miaosha/conf"
-	"miaosha/infra/db"
-	"miaosha/infra/rdb"
 	"miaosha/model"
 	"testing"
 )
 
 func init() {
 	if err := conf.Init(""); err != nil {
-		panic(err)
-	}
-	if err := db.Init(); err != nil {
-		panic(err)
-	}
-	if err := rdb.Init(); err != nil {
 		panic(err)
 	}
 }

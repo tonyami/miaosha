@@ -14,6 +14,13 @@ const (
 )
 
 type Order struct {
+	Id      int64  `db:"id"`
+	OrderId string `db:"order_id"`
+	UserId  int64  `db:"user_id"`
+	GoodsId int64  `db:"goods_id"`
+}
+
+type OrderInfo struct {
 	Id         int64     `db:"id"`
 	OrderId    string    `db:"order_id"`
 	UserId     int64     `db:"user_id"`
@@ -40,8 +47,8 @@ type OrderVO struct {
 	UpdateTime string `json:"updateTime"`
 }
 
-func NewOrder(userId int64, goods Goods) Order {
-	order := Order{
+func NewOrderInfo(userId int64, goods Goods) OrderInfo {
+	order := OrderInfo{
 		OrderId:    createOrderId(),
 		UserId:     userId,
 		GoodsId:    goods.Id,
@@ -57,7 +64,7 @@ func createOrderId() string {
 	return time.Now().Format("20060102150405") + key.Create(key.Number, 6)
 }
 
-func (order Order) ToVO() OrderVO {
+func (order OrderInfo) ToVO() OrderVO {
 	c := conf.Conf.Order
 	orderVO := OrderVO{
 		OrderId:    order.OrderId,

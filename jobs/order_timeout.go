@@ -39,23 +39,23 @@ func (*OrderTimeoutJob) Add(orderId string) {
 		Score:  float64(time.Now().Unix() + conf.Conf.Order.Expire),
 		Member: orderId,
 	}).Err(); err != nil {
-		log.Printf("订单【%s】进入延时队列失败, err: %v", orderId, err)
+		log.Printf("订单【%s】加入延迟队列失败, err: %v", orderId, err)
 	} else {
-		log.Printf("订单【%s】进入延时队列", orderId)
+		log.Printf("订单【%s】加入延迟队列", orderId)
 	}
 	return
 }
 
 func (*OrderTimeoutJob) Remove(orderId string) {
 	if err := rdb.Conn().ZRem(ctx, order_timeout_delay_queue, orderId).Err(); err != nil {
-		log.Printf("订单【%s】移除延时队列失败, err: %v", orderId, err)
+		log.Printf("订单【%s】移除延迟队列失败, err: %v", orderId, err)
 	} else {
-		log.Printf("订单【%s】移除延时队列", orderId)
+		log.Printf("订单【%s】移除延迟队列", orderId)
 	}
 	return
 }
 
-func (*OrderTimeoutJob) Start() {
+func (job *OrderTimeoutJob) Start() {
 	for {
 		list, err := rdb.Conn().ZRangeByScore(ctx, order_timeout_delay_queue, &redis.ZRangeBy{
 			Min:    "0",
@@ -72,7 +72,7 @@ func (*OrderTimeoutJob) Start() {
 				log.Printf("GetOrderByOrderId(%s) failed, err: %v", list[0], err)
 				continue
 			}
-			if err = repository.CloseOrder(order.OrderId, order.GoodsId); err != nil {
+			if err = repository.CloseOrder(order); err != nil {
 				log.Printf("CloseOrder(%s, %d) failed, err: %v", order.OrderId, order.GoodsId, err)
 				continue
 			}
