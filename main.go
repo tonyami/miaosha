@@ -5,7 +5,7 @@ import (
 	"miaosha/conf"
 	"miaosha/infra/db"
 	"miaosha/infra/rdb"
-	"miaosha/jobs"
+	"miaosha/mq"
 	"miaosha/router"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	if err := rdb.Init(); err != nil {
 		log.Fatalf("rdb init failed, err:%v", err)
 	}
-	jobs.Init()
+	mq.Init()
 	if err := router.Init(); err != nil {
 		log.Fatalf("router init failed, err:%v", err)
 	}

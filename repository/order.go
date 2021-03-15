@@ -92,7 +92,7 @@ func CreateOrder(order model.OrderInfo) (err error) {
 	return
 }
 
-func GetOrderIdByUidAndGid(userId, goodsId int64) (count int64, err error) {
+func CountOrderByUidAndGid(userId, goodsId int64) (count int64, err error) {
 	sqlStr := "select count(*) from miaosha_order_info where user_id = ? and goods_id = ? and status != ?"
 	if err = db.Conn().Get(&count, sqlStr, userId, goodsId, model.Closed); err != nil {
 		log.Printf("db.Get() failed, err: %v", err)

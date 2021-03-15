@@ -2,8 +2,8 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"miaosha/jobs"
 	"miaosha/model"
+	"miaosha/mq"
 	"miaosha/repository"
 	"net/http"
 	"strconv"
@@ -83,7 +83,7 @@ func CreateOrder(c *gin.Context) {
 	}
 	// 3、校验是否重复秒杀
 	uid, _ := c.Get("uid")
-	count, err := repository.GetOrderIdByUidAndGid(uid.(int64), goods.Id)
+	count, err := repository.CountOrderByUidAndGid(uid.(int64), goods.Id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": SystemErr,
@@ -96,7 +96,7 @@ func CreateOrder(c *gin.Context) {
 		})
 		return
 	}
-	// 4、减库存、创建订单、加入延迟队列
+	// 4、减库存、创建订单
 	order := model.NewOrderInfo(uid.(int64), goods)
 	if err = repository.CreateOrder(order); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -105,7 +105,7 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 	// 5、加入延迟队列
-	jobs.GetOrderTimeoutJob().Add(order.OrderId)
+	mq.OrderTimeout.Add(order.OrderId)
 	c.JSON(http.StatusOK, gin.H{
 		"orderId": order.OrderId,
 	})
@@ -150,6 +150,6 @@ func CancelOrder(c *gin.Context) {
 		})
 		return
 	}
-	jobs.GetOrderTimeoutJob().Remove(order.OrderId)
+	mq.OrderTimeout.Remove(order.OrderId)
 	c.JSON(http.StatusOK, nil)
 }
