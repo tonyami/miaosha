@@ -8,6 +8,29 @@ import (
 	"strconv"
 )
 
+func ReloadGoodsStock(c *gin.Context) {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		page = 1
+	}
+	list, err := repository.GetGoodsList(page)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"msg": SystemErr,
+		})
+		return
+	}
+	for _, v := range list {
+		if err = repository.SetGoodsStock(v.Id, v.Stock); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"msg": SystemErr,
+			})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, nil)
+}
+
 func GetGoodsList(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil {

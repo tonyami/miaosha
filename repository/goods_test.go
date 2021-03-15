@@ -13,3 +13,9 @@ func TestGetGoods(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestIncrStock(t *testing.T) {
+	if err := IncrStock(6); err != nil {
+		t.Fatal(err)
+	}
+}

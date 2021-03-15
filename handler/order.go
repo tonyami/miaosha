@@ -60,55 +60,75 @@ func CreateOrder(c *gin.Context) {
 	if err := c.Bind(r); err != nil {
 		return
 	}
-	// 1、查询秒杀商品
-	goods, err := repository.GetGoods(r.GoodsId)
+	// 预减库存
+	stock, err := repository.DecrStock(r.GoodsId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": SystemErr,
 		})
 		return
 	}
-	if goods.Id == 0 {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"msg": "商品不存在",
-		})
-		return
-	}
-	// 2、校验秒杀开始时间、结束时间、库存
-	if err = goods.Check(); err != nil {
+	if stock < 0 {
+		if err = repository.IncrStock(r.GoodsId); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"msg": SystemErr,
+			})
+			return
+		}
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{
-			"msg": err.Error(),
+			"msg": "商品已售罄",
 		})
 		return
 	}
-	// 3、校验是否重复秒杀
+	// 校验重复秒杀
 	uid, _ := c.Get("uid")
-	count, err := repository.CountOrderByUidAndGid(uid.(int64), goods.Id)
+	orderId, err := repository.GetOrderIdByUidAndGid(uid.(int64), r.GoodsId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": SystemErr,
 		})
 		return
 	}
-	if count > 0 {
+	if len(orderId) > 0 {
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{
 			"msg": "请勿重复秒杀",
 		})
 		return
 	}
-	// 4、减库存、创建订单
-	order := model.NewOrderInfo(uid.(int64), goods)
-	if err = repository.CreateOrder(order); err != nil {
+	// 异步下单
+	if err = mq.OrderPrecreate.Send(uid.(int64), r.GoodsId); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"msg": SystemErr,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, nil)
+}
+
+func GetOrderResult(c *gin.Context) {
+	goodsId, err := strconv.ParseInt(c.Query("goodsId"), 10, 64)
+	if err != nil || goodsId == 0 {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	uid, _ := c.Get("uid")
+	orderId, err := repository.GetOrderIdByUidAndGid(uid.(int64), goodsId)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"msg": "秒杀失败",
 		})
 		return
 	}
-	// 5、加入延迟队列
-	mq.OrderTimeout.Add(order.OrderId)
-	c.JSON(http.StatusOK, gin.H{
-		"orderId": order.OrderId,
-	})
+	if len(orderId) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"status": 0, // 排队中
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  1, // 秒杀成功
+			"orderId": orderId,
+		})
+	}
 }
 
 func CancelOrder(c *gin.Context) {

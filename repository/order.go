@@ -4,10 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"log"
 	"miaosha/infra/db"
+	"miaosha/infra/rdb"
 	"miaosha/model"
 )
+
+const orderUidGidKey = "order:%d:%d"
 
 func GetOrderList(userId int64, status string, page int) (list []model.OrderInfo, err error) {
 	args := []interface{}{userId}
@@ -88,7 +92,35 @@ func CreateOrder(order model.OrderInfo) (err error) {
 		err = errors.New("创建订单信息失败")
 		return
 	}
+	if err = CreateOrderInRDB(order); err != nil {
+		return
+	}
 	err = tx.Commit()
+	return
+}
+
+func CreateOrderInRDB(order model.OrderInfo) (err error) {
+	if err = rdb.Conn().Set(ctx, fmt.Sprintf(orderUidGidKey, order.UserId, order.GoodsId), order.OrderId, -1).Err(); err != nil {
+		log.Printf("rdb.Set() failed, err: %v, order: %v", err, order)
+	}
+	return
+}
+
+func DeleteOrderInRDB(order model.OrderInfo) (err error) {
+	if err = rdb.Conn().Del(ctx, fmt.Sprintf(orderUidGidKey, order.UserId, order.GoodsId)).Err(); err != nil {
+		log.Printf("rdb.Set() Del, err: %v, order: %v", err, order)
+	}
+	return
+}
+
+func GetOrderIdByUidAndGid(userId, goodsId int64) (orderId string, err error) {
+	if orderId, err = rdb.Conn().Get(ctx, fmt.Sprintf(orderUidGidKey, userId, goodsId)).Result(); err != nil {
+		if err == redis.Nil {
+			err = nil
+		} else {
+			log.Printf("GetOrderIdByUidAndGid() failed, err: %v", err)
+		}
+	}
 	return
 }
 
@@ -133,6 +165,11 @@ func CloseOrder(order model.OrderInfo) (err error) {
 		err = errors.New("加库存失败")
 		return
 	}
+	// redis加库存
+	if err = IncrStock(order.GoodsId); err != nil {
+		log.Printf("IncrStock() failed, goodsId: %d, err: %v", order.GoodsId, err)
+		return
+	}
 	// 删除订单
 	deleteStr := "delete from miaosha_order where order_id = ?"
 	if rs, err = tx.Exec(deleteStr, order.OrderId); err != nil {
@@ -143,7 +180,11 @@ func CloseOrder(order model.OrderInfo) (err error) {
 		err = errors.New("删除订单失败")
 		return
 	}
-	// 修改订单信息状态
+	// redis 删除订单
+	if err = DeleteOrderInRDB(order); err != nil {
+		return
+	}
+	//  修改订单信息状态
 	updateStr := "update miaosha_order_info set status = ? where order_id = ? and status = ?"
 	if rs, err = tx.Exec(updateStr, model.Closed, order.OrderId, model.Unpaid); err != nil {
 		log.Printf("UpdateOrderStatus() failed, err: %v", err)

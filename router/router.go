@@ -9,6 +9,7 @@ import (
 func Init() (err error) {
 	router := gin.Default()
 	router.Use(middleware.Cors())
+	router.GET("/goods/stock/reload", handler.ReloadGoodsStock)
 	router.GET("/code/sms", handler.GetSmsCode)
 	router.POST("/user/login", handler.UserLogin)
 	router.GET("/goods/list", handler.GetGoodsList)
@@ -18,6 +19,7 @@ func Init() (err error) {
 	router.GET("/order", handler.GetOrder)
 	router.GET("/order/list", handler.GetOrderList)
 	router.POST("/order", handler.CreateOrder)
+	router.GET("/order/result", handler.GetOrderResult)
 	router.POST("/order/cancel", handler.CancelOrder)
 	return router.Run()
 }

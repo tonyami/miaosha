@@ -15,21 +15,22 @@ import (
 const orderTimeoutDelayQueue = "order_timeout_delay_queue"
 
 var (
-	OrderTimeout *OrderTimeoutJob
+	OrderTimeout *OrderTimeoutMQ
 	once         sync.Once
 	ctx          = context.Background()
 )
 
 func init() {
 	once.Do(func() {
-		OrderTimeout = new(OrderTimeoutJob)
+		OrderTimeout = new(OrderTimeoutMQ)
+		OrderPrecreate = new(OrderPrecreateMQ)
 	})
 }
 
-type OrderTimeoutJob struct {
+type OrderTimeoutMQ struct {
 }
 
-func (*OrderTimeoutJob) Add(orderId string) {
+func (*OrderTimeoutMQ) Add(orderId string) {
 	if err := rdb.Conn().ZAdd(ctx, orderTimeoutDelayQueue, &redis.Z{
 		Score:  float64(time.Now().Unix() + conf.Conf.Order.Expire),
 		Member: orderId,
@@ -41,7 +42,7 @@ func (*OrderTimeoutJob) Add(orderId string) {
 	return
 }
 
-func (*OrderTimeoutJob) Remove(orderId string) {
+func (*OrderTimeoutMQ) Remove(orderId string) {
 	if err := rdb.Conn().ZRem(ctx, orderTimeoutDelayQueue, orderId).Err(); err != nil {
 		log.Printf("订单【%s】移除延迟队列失败, err: %v", orderId, err)
 	} else {
@@ -50,7 +51,7 @@ func (*OrderTimeoutJob) Remove(orderId string) {
 	return
 }
 
-func (job *OrderTimeoutJob) Receive() {
+func (*OrderTimeoutMQ) Receive() {
 	for {
 		list, err := rdb.Conn().ZRangeByScore(ctx, orderTimeoutDelayQueue, &redis.ZRangeBy{
 			Min:    "0",
@@ -59,6 +60,7 @@ func (job *OrderTimeoutJob) Receive() {
 			Count:  1,
 		}).Result()
 		if err != nil {
+			log.Printf("rdb.ZRangeByScore() failed, err: %v", err)
 			continue
 		}
 		if len(list) == 0 {
@@ -67,14 +69,14 @@ func (job *OrderTimeoutJob) Receive() {
 		}
 		order, err := repository.GetOrderByOrderId(list[0])
 		if err != nil {
-			log.Printf("GetOrderByOrderId(%s) failed, err: %v", list[0], err)
-			continue
+			log.Printf("GetOrderByOrderId() failed, orderId: %s, err: %v", list[0], err)
+			return
 		}
 		if err = repository.CloseOrder(order); err != nil {
-			log.Printf("CloseOrder(%s) failed, err: %v", order.OrderId, err)
-			continue
+			log.Printf("CloseOrder() failed, orderId: %s, err: %v", order.OrderId, err)
+			return
 		}
-		job.Remove(order.OrderId)
+		OrderTimeout.Remove(order.OrderId)
 		log.Printf("订单【%s】已关闭", order.OrderId)
 	}
 }
