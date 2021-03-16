@@ -145,16 +145,10 @@ func CancelOrder(c *gin.Context) {
 		})
 		return
 	}
-	if order.Id == 0 {
+	uid, _ := c.Get("uid")
+	if order.Id == 0 || order.UserId != uid.(int64) {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"msg": "订单不存在",
-		})
-		return
-	}
-	uid, _ := c.Get("uid")
-	if order.UserId != uid.(int64) {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-			"msg": "forbidden",
 		})
 		return
 	}
