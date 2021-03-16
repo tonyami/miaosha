@@ -8,9 +8,10 @@ import (
 var Conf = new(Config)
 
 type Config struct {
-	DB    *DB    `ini:"db"`
-	Redis *Redis `ini:"redis"`
-	Order *Order `ini:"order"`
+	DB        *DB        `ini:"db"`
+	Redis     *Redis     `ini:"redis"`
+	Order     *Order     `ini:"order"`
+	RateLimit *RateLimit `ini:"rate_limit"`
 }
 
 type DB struct {
@@ -30,6 +31,11 @@ type Redis struct {
 
 type Order struct {
 	Expire int64 `ini:"expire"`
+}
+
+type RateLimit struct {
+	Time  int64 `ini:"time"`
+	Count int64 `ini:"count"`
 }
 
 func Init(file string) (err error) {
