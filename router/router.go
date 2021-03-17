@@ -10,7 +10,7 @@ func Init() (err error) {
 	router := gin.Default()
 	router.Use(middleware.Cors())
 	router.Use(middleware.RateLimit())
-	router.GET("/goods/stock/reload", handler.ReloadGoodsStock)
+	router.GET("/goods/stock/init", handler.InitGoodsStock)
 	router.GET("/code/sms", handler.GetSmsCode)
 	router.POST("/user/login", handler.UserLogin)
 	router.GET("/goods/list", handler.GetGoodsList)

@@ -39,7 +39,15 @@ func IncrStock(goodsId int64) (err error) {
 }
 
 func GetGoodsList(page int) (list []model.Goods, err error) {
-	if err = db.Conn().Select(&list, "select * from miaosha_goods order by id desc limit ?, ?", (page-1)*PageSize, PageSize); err != nil {
+	args := []interface{}{}
+	s := ""
+	if page > 0 {
+		s = "limit ?, ?"
+		args = append(args, (page-1)*PageSize)
+		args = append(args, PageSize)
+	}
+	sqlStr := "select * from miaosha_goods order by id desc "
+	if err = db.Conn().Select(&list, sqlStr+s, args...); err != nil {
 		log.Printf("dao.GetGoodsList() failed, err: %v", err)
 	}
 	return
