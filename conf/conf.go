@@ -2,6 +2,7 @@ package conf
 
 import (
 	"gopkg.in/ini.v1"
+	"log"
 	"os"
 )
 
@@ -21,7 +22,6 @@ type DB struct {
 	Name     string `ini:"name"`
 	Idles    int    `ini:"idles"`
 	Opens    int    `ini:"opens"`
-	LifeTime int    `ini:"lifetime"`
 }
 
 type Redis struct {
@@ -38,13 +38,14 @@ type RateLimit struct {
 	Count int64 `ini:"count"`
 }
 
-func Init(file string) (err error) {
+func Init(file string) {
 	if file == "" {
 		initEnv()
 	} else {
-		err = initFile(file)
+		if err := initFile(file); err != nil {
+			log.Fatal(err)
+		}
 	}
-	return
 }
 
 func initEnv() (c *Config) {
@@ -55,7 +56,6 @@ func initEnv() (c *Config) {
 		Name:     os.Getenv("MIAOSHA_DB_NAME"),
 		Idles:    2,
 		Opens:    5,
-		LifeTime: 2,
 	}
 	Conf.Redis = &Redis{
 		Host:     os.Getenv("MIAOSHA_REDIS_HOST"),

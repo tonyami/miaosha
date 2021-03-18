@@ -1,4 +1,4 @@
-package key
+package util
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ const (
 	Number            = "1234567890"
 )
 
-func Create(str string, len int) string {
+func CreateKey(str string, len int) string {
 	var res string
 	b := bytes.NewBufferString(str)
 	length := b.Len()

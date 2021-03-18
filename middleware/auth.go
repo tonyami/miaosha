@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"miaosha/repository"
+	"miaosha/service"
 	"net/http"
 )
 
@@ -13,7 +13,8 @@ func Auth() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		user, err := repository.GetUserByToken(token)
+		userService := service.GetUserService()
+		user, err := userService.GetUserByToken(token)
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
@@ -23,9 +24,9 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		if err = repository.RenewUserToken(token); err != nil {
+		if err = userService.RenewUserToken(token); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"msg": "系统错误",
+				"msg": err.Error(),
 			})
 			return
 		}

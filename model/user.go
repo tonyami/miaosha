@@ -8,3 +8,8 @@ type User struct {
 	CreateTime time.Time `db:"create_time" json:"-"`
 	UpdateTime time.Time `db:"update_time" json:"-"`
 }
+
+type UserInfoVO struct {
+	User  User       `json:"user"`
+	Count OrderCount `json:"count"`
+}

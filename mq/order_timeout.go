@@ -1,37 +1,26 @@
 package mq
 
 import (
-	"context"
 	"github.com/go-redis/redis/v8"
 	"log"
 	"miaosha/conf"
-	"miaosha/infra/rdb"
-	"miaosha/repository"
+	"miaosha/model"
+	"miaosha/service"
 	"strconv"
-	"sync"
 	"time"
 )
 
 const orderTimeoutDelayQueue = "order_timeout_delay_queue"
 
-var (
-	OrderTimeout *OrderTimeoutMQ
-	once         sync.Once
-	ctx          = context.Background()
-)
+var OrderTimeout *orderTimeout
 
-func init() {
-	once.Do(func() {
-		OrderTimeout = new(OrderTimeoutMQ)
-		OrderPrecreate = new(OrderPrecreateMQ)
-	})
+type orderTimeout struct {
+	orderService service.IOrderService
+	redis        *redis.Client
 }
 
-type OrderTimeoutMQ struct {
-}
-
-func (*OrderTimeoutMQ) Add(orderId string) {
-	if err := rdb.Conn().ZAdd(ctx, orderTimeoutDelayQueue, &redis.Z{
+func (mq *orderTimeout) Send(orderId string) {
+	if err := mq.redis.ZAdd(ctx, orderTimeoutDelayQueue, &redis.Z{
 		Score:  float64(time.Now().Unix() + conf.Conf.Order.Expire),
 		Member: orderId,
 	}).Err(); err != nil {
@@ -42,8 +31,8 @@ func (*OrderTimeoutMQ) Add(orderId string) {
 	return
 }
 
-func (*OrderTimeoutMQ) Remove(orderId string) {
-	if err := rdb.Conn().ZRem(ctx, orderTimeoutDelayQueue, orderId).Err(); err != nil {
+func (mq *orderTimeout) Remove(orderId string) {
+	if err := mq.redis.ZRem(ctx, orderTimeoutDelayQueue, orderId).Err(); err != nil {
 		log.Printf("订单【%s】移除延迟队列失败, err: %v", orderId, err)
 	} else {
 		log.Printf("订单【%s】移除延迟队列", orderId)
@@ -51,32 +40,34 @@ func (*OrderTimeoutMQ) Remove(orderId string) {
 	return
 }
 
-func (*OrderTimeoutMQ) Receive() {
+func (mq *orderTimeout) Receive() {
+	var (
+		list      []string
+		err       error
+		orderInfo model.OrderInfo
+	)
 	for {
-		list, err := rdb.Conn().ZRangeByScore(ctx, orderTimeoutDelayQueue, &redis.ZRangeBy{
+		if list, err = mq.redis.ZRangeByScore(ctx, orderTimeoutDelayQueue, &redis.ZRangeBy{
 			Min:    "0",
 			Max:    strconv.FormatInt(time.Now().Unix(), 10),
 			Offset: 0,
 			Count:  1,
-		}).Result()
-		if err != nil {
-			log.Printf("rdb.ZRangeByScore() failed, err: %v", err)
+		}).Result(); err != nil {
+			log.Printf("redis.ZRangeByScore() failed, err: %v", err)
 			continue
 		}
 		if len(list) == 0 {
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-		order, err := repository.GetOrderByOrderId(list[0])
-		if err != nil {
-			log.Printf("GetOrderByOrderId() failed, orderId: %s, err: %v", list[0], err)
+		if orderInfo, err = mq.orderService.GetOrderInfo(list[0]); err != nil {
+			log.Printf("orderService.GetOrderInfo() failed, orderId: %s, err: %v", list[0], err)
 			return
 		}
-		if err = repository.CloseOrder(order); err != nil {
-			log.Printf("CloseOrder() failed, orderId: %s, err: %v", order.OrderId, err)
+		if err = mq.orderService.CloseOrder(orderInfo.UserId, orderInfo.OrderId); err != nil {
+			log.Printf("orderService.CloseOrder() failed, orderId: %s, err: %v", err)
 			return
 		}
-		OrderTimeout.Remove(order.OrderId)
-		log.Printf("订单【%s】已关闭", order.OrderId)
+		log.Printf("订单【%s】已关闭", orderInfo.OrderId)
 	}
 }

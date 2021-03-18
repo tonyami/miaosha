@@ -2,7 +2,7 @@ package model
 
 import (
 	"miaosha/conf"
-	"miaosha/infra/key"
+	"miaosha/infra/util"
 	"time"
 )
 
@@ -34,7 +34,7 @@ type OrderInfo struct {
 	UpdateTime time.Time `db:"update_time"`
 }
 
-type OrderVO struct {
+type OrderInfoVO struct {
 	OrderId    string `json:"orderId"`
 	GoodsId    int64  `json:"goodsId"`
 	GoodsName  string `json:"goodsName"`
@@ -61,12 +61,12 @@ func NewOrderInfo(userId int64, goods Goods) OrderInfo {
 }
 
 func createOrderId() string {
-	return time.Now().Format("20060102150405") + key.Create(key.Number, 6)
+	return time.Now().Format("20060102150405") + util.CreateKey(util.Number, 6)
 }
 
-func (order OrderInfo) ToVO() OrderVO {
+func (order OrderInfo) ToVO() OrderInfoVO {
 	c := conf.Conf.Order
-	orderVO := OrderVO{
+	orderVO := OrderInfoVO{
 		OrderId:    order.OrderId,
 		GoodsId:    order.GoodsId,
 		GoodsName:  order.GoodsName,
@@ -88,4 +88,9 @@ type OrderCount struct {
 	Unfinished int64 `db:"unfinished" json:"unfinished"`
 	Finished   int64 `db:"finished" json:"finished"`
 	Closed     int64 `db:"closed" json:"closed"`
+}
+
+type MiaoshaResult struct {
+	Status  int8   `json:"status"`
+	OrderId string `json:"orderId,omitempty"`
 }
