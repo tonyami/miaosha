@@ -11,6 +11,7 @@ import (
 	"miaosha/repository"
 	"miaosha/service"
 	"sync"
+	"time"
 )
 
 var once sync.Once
@@ -70,6 +71,10 @@ func (s *orderService) Miaosha(userId, goodsId int64) (err error) {
 		orderId string
 		stock   int64
 	)
+	// 加锁
+	if err = s.tryLock(userId, goodsId, time.Now().Unix()); err != nil {
+		return
+	}
 	// 校验重复秒杀
 	if orderId, err = s.GetOrderId(userId, goodsId); err != nil {
 		err = code.RedisErr
@@ -210,6 +215,27 @@ func (s *orderService) GetOrderId(userId, goodsId int64) (orderId string, err er
 			log.Printf("redis.Get() failed, err: %v", err)
 			err = code.RedisErr
 		}
+	}
+	return
+}
+
+func (s *orderService) tryLock(userId, goodsId, lockId int64) (err error) {
+	var res bool
+	if res, err = s.redis.SetNX(service.Ctx, fmt.Sprintf("lock:%d:%d", userId, goodsId), lockId, time.Minute).Result(); err != nil {
+		log.Printf("redis.SetNx() failed, err: %v", err)
+		err = code.RedisErr
+		return
+	}
+	if !res {
+		err = code.MiaoshaFailed
+	}
+	return
+}
+
+func (s *orderService) UnLock(userId, goodsId int64) (err error) {
+	if err = s.redis.Del(service.Ctx, fmt.Sprintf("lock:%d:%d", userId, goodsId)).Err(); err != nil {
+		log.Printf("redis.Del() failed, err: %v", err)
+		err = code.RedisErr
 	}
 	return
 }

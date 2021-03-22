@@ -56,4 +56,5 @@ type IOrderService interface {
 	CreateOrderCache(model.OrderInfo) (err error)
 	DeleteOrderCache(model.OrderInfo) (err error)
 	GetOrderId(int64, int64) (string, error)
+	UnLock(userId, goodsId int64) error
 }

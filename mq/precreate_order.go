@@ -56,5 +56,9 @@ func (mq *precreateOrder) Receive() {
 			log.Printf("orderService.CreateOrder() failed, err: %v", err)
 			return
 		}
+		if err = mq.orderService.UnLock(msg.UserId, msg.GoodsId); err != nil {
+			log.Printf("orderService.UnLocks() failed, err: %v", err)
+			return
+		}
 	}
 }

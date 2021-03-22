@@ -20,4 +20,5 @@ var (
 	OrderStatusErr = code(5310, "订单状态错误")
 	OrderCloseErr  = code(5320, "订单取消失败")
 	RepeateMiaosha = code(5330, "请勿重复秒杀")
+	MiaoshaFailed  = code(5340, "秒杀失败")
 )
