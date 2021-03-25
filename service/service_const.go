@@ -11,6 +11,7 @@ const (
 	UserTokenExpire    = 3600
 	GoodsStockKey      = "goods_stock:%d"
 	OrderUidGidKey     = "order:%d:%d"
+	GoodsKey           = "goods:%d"
 )
 
 var Ctx = context.Background()

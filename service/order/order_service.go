@@ -68,9 +68,17 @@ func (s *orderService) GetOrderInfoVO(orderId string, userId int64) (orderInfoVO
 
 func (s *orderService) Miaosha(userId, goodsId int64) (err error) {
 	var (
+		goods   model.Goods
 		orderId string
 		stock   int64
 	)
+	if goods, err = s.goodsService.GetGoods(goodsId); err != nil {
+		return
+	}
+	// 校验秒杀开始、结束时间
+	if err = goods.Check(); err != nil {
+		return
+	}
 	// 加锁
 	if err = s.tryLock(userId, goodsId, time.Now().Unix()); err != nil {
 		return

@@ -1,6 +1,7 @@
 package goods
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"miaosha/repository"
 	"miaosha/service"
 	"sync"
+	"time"
 )
 
 var once sync.Once
@@ -65,8 +67,52 @@ func (s *goodsService) GetGoodsVO(id int64) (goodsVO model.GoodsVO, err error) {
 }
 
 func (s *goodsService) GetGoods(id int64) (goods model.Goods, err error) {
+	// 尝试从缓存中取
+	if goods, err = s.getGoodsFromCache(id); err != nil {
+		return
+	}
+	// 从缓存中取到了
+	if goods.Id > 0 {
+		return
+	}
+	// 从数据库中取
 	if goods, err = s.goodsRepository.GetGoods(id); err != nil {
 		err = code.DBErr
+		return
+	}
+	// 再放入缓存
+	err = s.setGoodsCache(goods)
+	return
+}
+
+func (s *goodsService) setGoodsCache(goods model.Goods) (err error) {
+	var data []byte
+	if data, err = json.Marshal(goods); err != nil {
+		log.Printf("json.Marshal() failed, err: %v", err)
+		err = code.SerializeErr
+		return
+	}
+	if err = s.redis.Set(service.Ctx, fmt.Sprintf(service.GoodsKey, goods.Id), string(data), 12*time.Hour).Err(); err != nil {
+		log.Printf("redis.Set() failed, err: %v", err)
+		err = code.RedisErr
+	}
+	return
+}
+
+func (s *goodsService) getGoodsFromCache(id int64) (goods model.Goods, err error) {
+	var res string
+	if res, err = s.redis.Get(service.Ctx, fmt.Sprintf(service.GoodsKey, id)).Result(); err != nil {
+		if err == redis.Nil {
+			err = nil
+		} else {
+			log.Printf("redis.Set() failed, err: %v", err)
+			err = code.RedisErr
+		}
+		return
+	}
+	if err = json.Unmarshal([]byte(res), &goods); err != nil {
+		log.Printf("json.Unmarshal() failed, err: %v, json: %#v", err, goods)
+		err = code.SerializeErr
 	}
 	return
 }

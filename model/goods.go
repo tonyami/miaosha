@@ -1,7 +1,7 @@
 package model
 
 import (
-	"errors"
+	"miaosha/infra/code"
 	"time"
 )
 
@@ -63,11 +63,11 @@ func (goods Goods) Check() (err error) {
 	startTime := goods.StartTime.Unix()
 	endTime := goods.EndTime.Unix()
 	if now < startTime {
-		err = errors.New("活动还未开始")
+		err = code.MiaoshaNotStart
 	} else if now > endTime {
-		err = errors.New("活动已结束")
+		err = code.MiaoshaEnded
 	} else if goods.Stock <= 0 {
-		err = errors.New("商品已售罄")
+		err = code.GoodsSaleOut
 	}
 	return
 }

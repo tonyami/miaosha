@@ -106,6 +106,13 @@ func (s *userService) RenewUserToken(token string) (err error) {
 }
 
 func (s *userService) GetSmsCode(mobile string) (smsCode string, err error) {
+	if smsCode, err = s.GetLoginSmsCode(mobile); err != nil {
+		return
+	}
+	if len(smsCode) > 0 {
+		err = code.TooManyRequests
+		return
+	}
 	smsCode = util.CreateKey(util.Number, service.SmsCodeSize)
 	if err := s.SaveLoginSmsCode(mobile, smsCode); err != nil {
 		err = code.GetSmsCodeErr

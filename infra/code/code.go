@@ -13,7 +13,9 @@ var (
 	SmsCodeErr    = code(5101, "验证码错误")
 
 	// goods [5200, 5300)
-	GoodsSaleOut = code(5200, "商品已售罄")
+	GoodsSaleOut    = code(5200, "商品已售罄")
+	MiaoshaNotStart = code(5211, "秒杀还未开始")
+	MiaoshaEnded    = code(5222, "秒杀已结束")
 
 	// order [5300, 5400)
 	OrderNotFound  = code(5300, "订单不存在")
