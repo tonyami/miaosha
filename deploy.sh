@@ -38,7 +38,7 @@ stop_container() {
 
 # 启动容器
 start_container () {
-  docker run --name ${NAME} -p 8080:8080 -e GIN_MODE=release -d ${NAME}:${VERSION}
+  docker run --name ${NAME} -p 8080:8080 -v /etc/localtime:/etc/localtime -e GIN_MODE=release -d ${NAME}:${VERSION}
   echo -e '\033[32m容器已启动... \033[0m'
 }
 
