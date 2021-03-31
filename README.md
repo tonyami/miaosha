@@ -1,12 +1,10 @@
 # miaosha
 
-从零开始基于 Golang 实现秒杀系统，技术栈：Golang、Gin、Redis、MySQL、NSQ等，包括用户注册登录、分布式 Session、秒杀、异步下单、防刷限流等功能，采用 Jenkins+Docker 部署；文档将逐渐完善，项目中还有很多不足，欢迎大家批评指正。
+基于 Golang 实现高并发秒杀系统，技术栈：Golang、Gin、Redis、MySQL、NSQ等，包括用户注册登录、分布式 Session、秒杀、异步下单、限流等功能，采用 Jenkins+Docker 部署；项目中还有很多不足，欢迎大家批评指正。
 
 > 基础思路参考慕课网若鱼1919老师 **[Java秒杀系统方案优化](https://coding.imooc.com/class/168.html)** 课程。
 
-在线演示：Please wait
-
-前端项目：https://github.com/mmtony/miaosha-web
+[在线演示](https://mtony.cn/miaosha/)
 
 ## 功能
 
@@ -16,7 +14,7 @@
 - [x] 分布式 Session
 - [x] 商品列表
 - [x] 商品详情
-- [x] 秒杀（超卖问题）
+- [x] 秒杀
 - [x] 订单列表
 - [x] 订单详情
 - [x] 取消订单
@@ -29,7 +27,7 @@
 - [x] 安全优化（限流）
 - [x] 异步下单
 - [ ] 支付
-- [ ] 自动化部署（Nginx、Docker、Jenkins）
+- [x] 自动化部署（Nginx、Docker、Jenkins）
 
 #### 高级
 
