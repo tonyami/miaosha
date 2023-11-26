@@ -29,7 +29,9 @@ jobs:
         cache-dependency-path: './miaosha-server/go.sum'
 
     - name: Build
-      run: CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o ./bin/miaosha ./main.go
+      run: |
+          go mod tidy
+          CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o ./bin/miaosha ./main.go
 
     - name: Copy file via SCP
       run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no ./bin/miaosha "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}"
