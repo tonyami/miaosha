@@ -1,13 +1,13 @@
 name: Frontend CI
 
 on:
-  workflow_dispatch:
-  #push:
-  #  branches: [ "master" ]
-  #  paths: [ "miaosha-h5/**" ]
-  #pull_request:
-  #  branches: [ "master" ]
-  #  paths: [ "miaosha-h5/**" ]
+  #workflow_dispatch:
+  push:
+    branches: [ "master" ]
+    paths: [ "miaosha-h5/**" ]
+  pull_request:
+    branches: [ "master" ]
+    paths: [ "miaosha-h5/**" ]
 
 defaults:
    run:
