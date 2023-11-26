@@ -27,12 +27,13 @@ jobs:
         cache: 'npm'
         cache-dependency-path: './miaosha-h5/package-lock.json'
 
-    - name: npm install and build
-      run: |
-        npm install
-        npm run build
+    - name: npm install
+      run: npm install
 
-    - name: Zip files
+    - name: npm build
+      run: npm run build
+
+    - name: Zip dist.zip
       run: zip -r dist.zip ./dist/** 
 
     - name: Clean up old files
@@ -40,4 +41,7 @@ jobs:
 
     - name: Copy file via SCP
       run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no dist.zip "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}"
+
+    - name: Unzip dist.zip
+      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "unzip ${{ secrets.DEPLOY_DIR }}/dist.zip"
       
