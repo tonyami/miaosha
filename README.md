@@ -4,9 +4,9 @@
 
 ## 技术栈
 
-前端（miaosha-h5）：Vue.js、Vant、Vue-Router、Axios 等。
+前端（miaosha-h5）：Vue.js、Vant、Vue-Router、Axios
 
-服务端（miaosha-server）：Golang、Gin、SQLX、MySQL、Redis 等。
+服务端（miaosha-server）：Golang、Gin、SQLX、MySQL、Redis
 
 ## 截图
 
