@@ -1,13 +1,13 @@
 name: Frontend CI
 
 on:
-  # workflow_dispatch:
-  push:
-    branches: [ "master" ]
-    paths: [ "miaosha-h5/**" ]
-  pull_request:
-    branches: [ "master" ]
-    paths: [ "miaosha-h5/**" ]
+  workflow_dispatch:
+  #push:
+  #  branches: [ "master" ]
+  #  paths: [ "miaosha-h5/**" ]
+  #pull_request:
+  #  branches: [ "master" ]
+  #  paths: [ "miaosha-h5/**" ]
 
 defaults:
    run:
@@ -31,6 +31,9 @@ jobs:
       run: |
         npm install
         npm run build
+
+    - name: Clean up old files
+      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "rm -rf ${{ secrets.DEPLOY_DIR }}/**"
 
     - name: Copy file via SCP
       run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r dist/** "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}"
