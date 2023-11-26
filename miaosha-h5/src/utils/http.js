@@ -30,13 +30,13 @@ instance.interceptors.response.use(response => {
       })
     } else {
       Toast.fail({
-        message: error.response.data.msg,
+        message: error.response.statusText,
         icon: 'cross'
       })
     }
   } else {
     Toast.fail({
-      message: '网络连接异常',
+      message: error.message,
       icon: 'cross'
     })
   }
