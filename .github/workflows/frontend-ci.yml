@@ -32,9 +32,12 @@ jobs:
         npm install
         npm run build
 
+    - name: Zip files
+      run: zip -r dist.zip ./dist/** 
+
     - name: Clean up old files
-      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "rm -rf ${{ secrets.DEPLOY_DIR }}/**"
+      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "rm -rf ${{ secrets.DEPLOY_DIR }}/dist*"
 
     - name: Copy file via SCP
-      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r dist/** "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}"
+      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no dist.zip "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}" "unzip ${{ secrets.DEPLOY_DIR }}/dist.zip"
       
