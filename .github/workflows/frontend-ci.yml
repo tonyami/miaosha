@@ -41,4 +41,5 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         source: "./miaosha-h5/dist/**"
         target: ${{ secrets.TARGET_H5 }}
+        rm: true
         
