@@ -39,7 +39,7 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
-        source: "./dist/**"
+        source: "./miaosha-h5/dist/**"
         target: "/tmp"
         
     #- name: Zip dist.zip
