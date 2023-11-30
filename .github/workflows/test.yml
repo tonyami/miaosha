@@ -1,0 +1,17 @@
+name: Test CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get server ip
+      run: ifconfig
+
+    - name: Ping
+      run: ping ccr.ccs.tencentyun.com -c 5
