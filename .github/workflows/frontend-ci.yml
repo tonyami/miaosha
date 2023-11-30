@@ -1,13 +1,13 @@
 name: Frontend CI
 
 on:
-  #workflow_dispatch:
-  push:
-    branches: [ "master" ]
-    paths: [ "miaosha-h5/**" ]
-  pull_request:
-    branches: [ "master" ]
-    paths: [ "miaosha-h5/**" ]
+  workflow_dispatch:
+  #push:
+  #  branches: [ "master" ]
+  #  paths: [ "miaosha-h5/**" ]
+  #pull_request:
+  #  branches: [ "master" ]
+  #  paths: [ "miaosha-h5/**" ]
 
 defaults:
    run:
@@ -32,16 +32,25 @@ jobs:
 
     - name: npm build
       run: npm run build
+      
+    - name: copy file via ssh password
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        source: "./dist/**"
+        target: "/tmp"
+        
+    #- name: Zip dist.zip
+    #  run: zip -r dist.zip ./dist/** 
 
-    - name: Zip dist.zip
-      run: zip -r dist.zip ./dist/** 
+    #- name: Clean up old files
+    #  run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "rm -rf ${{ secrets.DEPLOY_DIR }}/dist*"
 
-    - name: Clean up old files
-      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "rm -rf ${{ secrets.DEPLOY_DIR }}/dist*"
+    #- name: Copy file via SCP
+    #  run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no dist.zip "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}"
 
-    - name: Copy file via SCP
-      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no dist.zip "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}":"${{ secrets.DEPLOY_DIR }}"
-
-    - name: Unzip dist.zip
-      run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "unzip -d ${{ secrets.DEPLOY_DIR }} ${{ secrets.DEPLOY_DIR }}/dist.zip"
+    #- name: Unzip dist.zip
+    #  run: sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "unzip -d ${{ secrets.DEPLOY_DIR }} ${{ secrets.DEPLOY_DIR }}/dist.zip"
       
