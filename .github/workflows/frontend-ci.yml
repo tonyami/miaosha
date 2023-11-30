@@ -42,4 +42,5 @@ jobs:
         source: "./miaosha-h5/dist/**"
         target: ${{ secrets.TARGET_H5 }}
         rm: true
+        strip_components: 1
         
