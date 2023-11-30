@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Get server ip
-      run: ifconfig
+    - name: Install dependenceies
+      run: |
+        apt-get update
+        apt install iputils-ping
 
     - name: Ping
       run: ping ccr.ccs.tencentyun.com -c 5
