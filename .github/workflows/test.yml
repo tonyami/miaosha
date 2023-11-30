@@ -12,8 +12,8 @@ jobs:
     steps:
     - name: Install dependenceies
       run: |
-        apt-get update
-        apt install iputils-ping
+        sudo apt-get update
+        sudo apt install iputils-ping
 
     - name: Ping
       run: ping ccr.ccs.tencentyun.com -c 5
